@@ -1,0 +1,382 @@
+[
+  {
+    "rule_id": "IAM-01",
+    "name": "Root account MFA not enabled",
+    "description": "The AWS root account does not have multi-factor authentication (MFA) enabled. The root account has unrestricted access to all AWS resources.",
+    "severity": "CRITICAL",
+    "service": "iam",
+    "provider": "aws",
+    "resource_path": "iam.account_summary",
+    "remediation": "Enable MFA for the root account in the AWS IAM console under 'Security credentials'. Use a hardware MFA device for root accounts.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "1.5"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "root",
+        "details": {
+          "AccountMFAEnabled": 0
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "RDS-01",
+    "name": "RDS instance publicly accessible",
+    "description": "The RDS database instance is configured with PubliclyAccessible=true, exposing the database endpoint to the internet.",
+    "severity": "CRITICAL",
+    "service": "rds",
+    "provider": "aws",
+    "resource_path": "rds.instances.*",
+    "remediation": "Set PubliclyAccessible=false. Place RDS instances in private subnets with no direct internet route. Use a bastion host or AWS PrivateLink for access.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "2.3.3"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "prod-postgres",
+        "details": {
+          "PubliclyAccessible": true,
+          "StorageEncrypted": false
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "IAM-05",
+    "name": "Console user without MFA",
+    "description": "IAM users with console access do not have MFA enabled, leaving accounts vulnerable to credential theft attacks.",
+    "severity": "HIGH",
+    "service": "iam",
+    "provider": "aws",
+    "resource_path": "iam.users.*",
+    "remediation": "Enable MFA for all IAM users with console access. Enforce MFA via an IAM policy with a condition on 'aws:MultiFactorAuthPresent'.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "1.10"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "alice",
+        "details": {
+          "name": "alice",
+          "MFADevices": []
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "S3-01",
+    "name": "S3 Block Public Access not fully enabled",
+    "description": "One or more S3 buckets have Block Public Access settings disabled, potentially exposing data to the internet.",
+    "severity": "HIGH",
+    "service": "s3",
+    "provider": "aws",
+    "resource_path": "s3.buckets.*",
+    "remediation": "Enable all four S3 Block Public Access settings at both the account and bucket level. Use bucket policies with explicit Deny for public access.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "2.1.4"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "company-public-data",
+        "details": {
+          "BlockPublicAcls": false
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "EC2-04",
+    "name": "EC2 instance with IMDSv1 enabled",
+    "description": "Instance Metadata Service v1 (IMDSv1) does not require authentication, making instances vulnerable to SSRF-based metadata theft (e.g., credential exfiltration).",
+    "severity": "HIGH",
+    "service": "ec2",
+    "provider": "aws",
+    "resource_path": "ec2.instances.*",
+    "remediation": "Set HttpTokens=required in instance metadata options to enforce IMDSv2. Apply via AWS CLI: aws ec2 modify-instance-metadata-options --http-tokens required.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "5.6"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "i-0abc123456",
+        "details": {
+          "MetadataOptions": {
+            "HttpTokens": "optional"
+          }
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "RDS-02",
+    "name": "RDS storage not encrypted",
+    "description": "RDS storage encryption is disabled. Database data at rest is stored unencrypted, risking exposure in the event of physical media compromise.",
+    "severity": "HIGH",
+    "service": "rds",
+    "provider": "aws",
+    "resource_path": "rds.instances.*",
+    "remediation": "Enable storage encryption on the RDS instance. Note: encryption can only be enabled at creation time; migrate existing unencrypted instances via snapshot restore.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "2.3.1"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "prod-postgres",
+        "details": {
+          "StorageEncrypted": false
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "CT-01",
+    "name": "CloudTrail log file validation disabled",
+    "description": "CloudTrail log file validation is not enabled. Without it, attackers can tamper with audit logs without detection.",
+    "severity": "HIGH",
+    "service": "cloudtrail",
+    "provider": "aws",
+    "resource_path": "cloudtrail.trails.*",
+    "remediation": "Enable log file validation on all trails via: aws cloudtrail update-trail --name <trail> --enable-log-file-validation.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "3.2"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "main-trail",
+        "details": {
+          "LogFileValidationEnabled": false
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "GD-01",
+    "name": "GuardDuty detector disabled",
+    "description": "Amazon GuardDuty is not enabled. Without GuardDuty, threat detection for unauthorized behaviour, compromised instances, and account reconnaissance is absent.",
+    "severity": "HIGH",
+    "service": "guardduty",
+    "provider": "aws",
+    "resource_path": "guardduty.detectors.*",
+    "remediation": "Enable GuardDuty in all regions. Enable optional protection plans (S3, EKS, RDS, Lambda, Malware). Configure SNS alerts for HIGH/CRITICAL findings.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "4.9"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "detector-0001",
+        "details": {
+          "Status": "DISABLED"
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "IAM-06",
+    "name": "IAM password policy too weak",
+    "description": "The account's IAM password policy does not meet minimum security requirements (length < 14, missing complexity, no expiry).",
+    "severity": "MEDIUM",
+    "service": "iam",
+    "provider": "aws",
+    "resource_path": "iam.password_policy",
+    "remediation": "Set MinimumPasswordLength >= 14, enable all complexity requirements, set MaxPasswordAge to 90 days or fewer.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "1.8"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "account",
+        "details": {
+          "MinimumPasswordLength": 6
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "KMS-01",
+    "name": "KMS key rotation not enabled",
+    "description": "Customer-managed KMS keys do not have automatic annual key rotation enabled, increasing the risk of cryptographic key compromise.",
+    "severity": "MEDIUM",
+    "service": "kms",
+    "provider": "aws",
+    "resource_path": "kms.keys.*",
+    "remediation": "Enable automatic key rotation: aws kms enable-key-rotation --key-id <key-id>. Keys are rotated annually.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "3.7"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "key-0001",
+        "details": {
+          "KeyRotationEnabled": false
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "VPC-01",
+    "name": "VPC Flow Logs not enabled",
+    "description": "No VPC Flow Logs are configured. Without flow logs, network traffic to and from EC2 instances cannot be audited or used for incident investigation.",
+    "severity": "MEDIUM",
+    "service": "vpc",
+    "provider": "aws",
+    "resource_path": "vpc.flow_logs",
+    "remediation": "Enable VPC Flow Logs for all VPCs. Send logs to CloudWatch Logs or S3. Set retention to at least 90 days.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "3.9"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "vpc",
+        "details": {}
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "RDS-03",
+    "name": "RDS automated backups disabled",
+    "description": "RDS automated backup retention is set to 0 days, disabling backups entirely. This prevents point-in-time recovery in the event of data loss or corruption.",
+    "severity": "MEDIUM",
+    "service": "rds",
+    "provider": "aws",
+    "resource_path": "rds.instances.*",
+    "remediation": "Set BackupRetentionPeriod to at least 7 days (35 days for compliance-sensitive workloads).",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "2.3.2"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "prod-postgres",
+        "details": {
+          "BackupRetentionPeriod": 0
+        }
+      }
+    ],
+    "flagged_count": 1
+  },
+  {
+    "rule_id": "IAM-10",
+    "name": "Stale IAM access key (>90 days)",
+    "description": "An active IAM access key has not been rotated in over 90 days, increasing the risk of long-term credential compromise.",
+    "severity": "LOW",
+    "service": "iam",
+    "provider": "aws",
+    "resource_path": "iam.users.*",
+    "remediation": "Rotate access keys every 90 days. Disable or delete keys unused for 30+ days. Use IAM roles instead of long-term access keys where possible.",
+    "compliance": [
+      {
+        "name": "CIS AWS Foundations",
+        "version": "3.0",
+        "reference": "1.14"
+      }
+    ],
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
+    ],
+    "flagged_items": [
+      {
+        "id": "alice",
+        "details": {
+          "AccessKeyId": "AKIA1111",
+          "CreateDate": "2022-03-01"
+        }
+      }
+    ],
+    "flagged_count": 1
+  }
+]
