@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220">
+  <defs>
+
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0d1117"/>
+      <stop offset="50%"  stop-color="#0f1923"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+
+    <!-- Glow gradients per provider -->
+    <radialGradient id="glowAWS" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ff9900" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ff9900" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowAzure" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#0078d4" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0078d4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowGCP" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#34a853" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#34a853" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Shield gradient -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#58a6ff"/>
+      <stop offset="100%" stop-color="#1f6feb"/>
+    </linearGradient>
+
+    <!-- Title gradient -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#e6edf3"/>
+      <stop offset="60%"  stop-color="#c9d1d9"/>
+      <stop offset="100%" stop-color="#8b949e"/>
+    </linearGradient>
+
+    <!-- Separator line gradient -->
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ff9900" stop-opacity="0"/>
+      <stop offset="20%"  stop-color="#ff9900"/>
+      <stop offset="50%"  stop-color="#0078d4"/>
+      <stop offset="80%"  stop-color="#34a853"/>
+      <stop offset="100%" stop-color="#34a853" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Clip path for rounded rectangle -->
+    <clipPath id="roundClip">
+      <rect width="900" height="220" rx="14" ry="14"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="900" height="220" rx="14" ry="14" fill="url(#bg)"/>
+
+  <!-- ── Border ── -->
+  <rect width="900" height="220" rx="14" ry="14"
+        fill="none" stroke="#21262d" stroke-width="1.5"/>
+
+  <!-- ── Subtle grid lines ── -->
+  <g clip-path="url(#roundClip)" opacity="0.04" stroke="#58a6ff" stroke-width="0.5">
+    <line x1="0"   y1="55"  x2="900" y2="55"/>
+    <line x1="0"   y1="110" x2="900" y2="110"/>
+    <line x1="0"   y1="165" x2="900" y2="165"/>
+    <line x1="225" y1="0"   x2="225" y2="220"/>
+    <line x1="450" y1="0"   x2="450" y2="220"/>
+    <line x1="675" y1="0"   x2="675" y2="220"/>
+  </g>
+
+  <!-- ── Provider glow blobs ── -->
+  <ellipse cx="160" cy="110" rx="120" ry="90" fill="url(#glowAWS)"    opacity="0.7"/>
+  <ellipse cx="450" cy="110" rx="120" ry="90" fill="url(#glowAzure)"  opacity="0.7"/>
+  <ellipse cx="740" cy="110" rx="120" ry="90" fill="url(#glowGCP)"    opacity="0.7"/>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       LEFT COLUMN — Shield + provider badges
+       ══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Shield body -->
+  <path d="M78 44 L112 44 L120 52 L120 96 Q120 120 95 132 Q70 120 70 96 L70 52 Z"
+        fill="url(#shieldGrad)" opacity="0.15"/>
+  <path d="M78 44 L112 44 L120 52 L120 96 Q120 120 95 132 Q70 120 70 96 L70 52 Z"
+        fill="none" stroke="url(#shieldGrad)" stroke-width="1.8" opacity="0.8"/>
+
+  <!-- Shield check-mark -->
+  <polyline points="82,88 91,99 110,72"
+            fill="none" stroke="#58a6ff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+
+  <!-- Provider badges — AWS -->
+  <rect x="58" y="148" width="76" height="26" rx="5"
+        fill="#1a1e24" stroke="#ff9900" stroke-width="1.2"/>
+  <text x="96" y="165.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="11" font-weight="700" fill="#ff9900"
+        text-anchor="middle" letter-spacing="0.8">AWS</text>
+
+  <!-- Provider badges — Azure -->
+  <rect x="142" y="148" width="76" height="26" rx="5"
+        fill="#1a1e24" stroke="#0078d4" stroke-width="1.2"/>
+  <text x="180" y="165.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="11" font-weight="700" fill="#0078d4"
+        text-anchor="middle" letter-spacing="0.8">AZURE</text>
+
+  <!-- Provider badges — GCP -->
+  <rect x="226" y="148" width="76" height="26" rx="5"
+        fill="#1a1e24" stroke="#34a853" stroke-width="1.2"/>
+  <text x="264" y="165.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="11" font-weight="700" fill="#34a853"
+        text-anchor="middle" letter-spacing="0.8">GCP</text>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CENTRE COLUMN — Main title + subtitle
+       ══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Main title -->
+  <text x="450" y="90"
+        font-family="'Segoe UI',Roboto,'Helvetica Neue',sans-serif"
+        font-size="34" font-weight="700" fill="url(#titleGrad)"
+        text-anchor="middle" letter-spacing="-0.5">
+    MultiCloud Security Audit
+  </text>
+
+  <!-- Separator line -->
+  <rect x="200" y="102" width="500" height="2" rx="1" fill="url(#lineGrad)" opacity="0.7"/>
+
+  <!-- Subtitle -->
+  <text x="450" y="130"
+        font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="14" font-weight="400" fill="#8b949e"
+        text-anchor="middle" letter-spacing="0.3">
+    Open-source Python security auditing for AWS · Azure · GCP
+  </text>
+
+  <!-- Stat pills -->
+  <!-- Pill: CIS Benchmark -->
+  <rect x="265" y="152" width="130" height="24" rx="12"
+        fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <circle cx="283" cy="164" r="5" fill="#ff9900" opacity="0.85"/>
+  <text x="293" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10.5" fill="#8b949e">CIS Benchmark v3.0</text>
+
+  <!-- Pill: 140+ Checks -->
+  <rect x="405" y="152" width="90" height="24" rx="12"
+        fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <circle cx="423" cy="164" r="5" fill="#58a6ff" opacity="0.85"/>
+  <text x="433" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10.5" fill="#8b949e">140+ Checks</text>
+
+  <!-- Pill: Read-only -->
+  <rect x="505" y="152" width="82" height="24" rx="12"
+        fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <circle cx="523" cy="164" r="5" fill="#34a853" opacity="0.85"/>
+  <text x="533" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10.5" fill="#8b949e">Read-only</text>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       RIGHT COLUMN — Decorative cloud circuit art
+       ══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Cloud shape (stylised) -->
+  <g transform="translate(630,32)" opacity="0.55">
+    <ellipse cx="65" cy="52" rx="48" ry="32" fill="none" stroke="#30363d" stroke-width="1.4"/>
+    <ellipse cx="42" cy="62" rx="32" ry="22" fill="none" stroke="#30363d" stroke-width="1"/>
+    <ellipse cx="88" cy="60" rx="28" ry="20" fill="none" stroke="#30363d" stroke-width="1"/>
+    <!-- Nodes -->
+    <circle cx="30"  cy="74" r="4" fill="#ff9900" opacity="0.9"/>
+    <circle cx="65"  cy="82" r="4" fill="#0078d4" opacity="0.9"/>
+    <circle cx="100" cy="74" r="4" fill="#34a853" opacity="0.9"/>
+    <circle cx="65"  cy="22" r="4" fill="#58a6ff" opacity="0.9"/>
+    <!-- Connector lines -->
+    <line x1="30"  y1="74" x2="65"  y2="82" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="65"  y1="82" x2="100" y2="74" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="65"  y1="22" x2="65"  y2="34" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Vertical rule between centre and right -->
+  <line x1="615" y1="36" x2="615" y2="184"
+        stroke="#21262d" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Stats on right -->
+  <text x="750" y="148"
+        font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="11" fill="#484f58"
+        text-anchor="middle" letter-spacing="0.4">
+    Python 3.10+  ·  GPL-3.0
+  </text>
+
+  <!-- ── Bottom accent line ── -->
+  <rect x="0" y="216" width="900" height="4" rx="0"
+        fill="url(#lineGrad)" clip-path="url(#roundClip)" opacity="0.6"/>
+
+</svg>

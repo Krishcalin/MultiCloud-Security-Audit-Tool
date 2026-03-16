@@ -1,6 +1,5 @@
 <p align="center">
-  <strong>MultiCloud Security Audit Tool</strong><br/>
-  <em>Open-source Python tool for security audits across AWS, Azure, and GCP</em>
+  <img src="docs/banner.svg" alt="MultiCloud Security Audit Tool" width="900"/>
 </p>
 
 <p align="center">
