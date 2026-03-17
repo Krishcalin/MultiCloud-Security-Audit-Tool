@@ -1,0 +1,17 @@
+{
+  "id": "STORAGE-01",
+  "name": "Storage account allows HTTP traffic",
+  "description": "A storage account does not enforce HTTPS-only transfers. Data in transit over HTTP is not encrypted, exposing blobs, files, queues, and tables to interception attacks (MITM).",
+  "severity": "HIGH",
+  "service": "storage",
+  "path": "storage.accounts.*",
+  "conditions": ["supportsHttpsTrafficOnly", "false"],
+  "remediation": "Enable 'Secure transfer required' on all storage accounts: Azure Portal → Storage Account → Configuration → Secure transfer required → Enabled. Enforce at scale via Azure Policy (built-in policy: 'Secure transfer to storage accounts should be enabled').",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "3.1"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "4.2"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "SEC-02",
+  "name": "No security contact email configured in Defender for Cloud",
+  "description": "No security contact with email notifications is configured in Microsoft Defender for Cloud. Without a security contact, critical security alerts — including active attacks and compromised resources — are not communicated to responsible personnel.",
+  "severity": "MEDIUM",
+  "service": "security",
+  "path": "security.security_contact_configured",
+  "conditions": [".", "false"],
+  "remediation": "Configure a security contact: Defender for Cloud → Environment Settings → Subscription → Email notifications → Add email address and enable 'Notify about alerts with the following severity: High'. Add a distribution list, not an individual, to ensure continuity.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "2.14"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/defender-for-cloud/configure-email-notifications"
+  ]
+}

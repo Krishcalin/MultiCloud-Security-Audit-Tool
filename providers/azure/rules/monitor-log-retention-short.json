@@ -1,0 +1,17 @@
+{
+  "id": "MON-02",
+  "name": "Activity Log retention period less than 365 days",
+  "description": "The Activity Log retention period is configured to less than 365 days. Forensic investigations and compliance audits frequently require more than 90 days of historical activity log data.",
+  "severity": "MEDIUM",
+  "service": "monitor",
+  "path": "monitor.log_retention_days",
+  "conditions": [".", "lessthan", 365],
+  "remediation": "Set log retention to at least 365 days. Use Azure Monitor Diagnostic Settings to send activity logs to a Log Analytics workspace (custom retention up to 2 years) or an Azure Storage Account (unlimited retention). Archive logs to cold storage after 90 days.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "5.1.2"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.5"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-archive"
+  ]
+}

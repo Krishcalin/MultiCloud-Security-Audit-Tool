@@ -1,0 +1,29 @@
+{
+  "about": "CIS Microsoft Azure Foundations Benchmark v2.0 — MultiCloud Security Audit Tool",
+  "rules": {
+    "entra-security-defaults-disabled.json":  [{"enabled": true, "level": "danger"}],
+    "entra-mfa-not-all-users.json":           [{"enabled": true, "level": "danger"}],
+    "entra-legacy-auth-allowed.json":         [{"enabled": true, "level": "danger"}],
+    "entra-guest-users.json":                 [{"enabled": true, "level": "warning"}],
+    "storage-https-only.json":                [{"enabled": true, "level": "danger"}],
+    "storage-public-blob-access.json":        [{"enabled": true, "level": "danger"}],
+    "storage-minimum-tls.json":               [{"enabled": true, "level": "warning"}],
+    "storage-soft-delete-disabled.json":      [{"enabled": true, "level": "warning"}],
+    "keyvault-soft-delete-disabled.json":     [{"enabled": true, "level": "danger"}],
+    "keyvault-purge-protection-disabled.json":[{"enabled": true, "level": "danger"}],
+    "keyvault-diagnostics-disabled.json":     [{"enabled": true, "level": "warning"}],
+    "keyvault-public-network-access.json":    [{"enabled": true, "level": "danger"}],
+    "network-rdp-open.json":                  [{"enabled": true, "level": "danger"}],
+    "network-ssh-open.json":                  [{"enabled": true, "level": "danger"}],
+    "sql-no-aad-admin.json":                  [{"enabled": true, "level": "danger"}],
+    "sql-auditing-disabled.json":             [{"enabled": true, "level": "danger"}],
+    "sql-threat-detection-disabled.json":     [{"enabled": true, "level": "warning"}],
+    "monitor-log-profile-missing.json":       [{"enabled": true, "level": "warning"}],
+    "monitor-log-retention-short.json":       [{"enabled": true, "level": "warning"}],
+    "security-defender-not-standard.json":    [{"enabled": true, "level": "danger"}],
+    "security-no-contact.json":               [{"enabled": true, "level": "warning"}],
+    "appservice-https-only.json":             [{"enabled": true, "level": "danger"}],
+    "appservice-ftp-enabled.json":            [{"enabled": true, "level": "warning"}],
+    "appservice-auth-disabled.json":          [{"enabled": true, "level": "warning"}]
+  }
+}

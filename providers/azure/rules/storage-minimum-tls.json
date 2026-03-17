@@ -1,0 +1,17 @@
+{
+  "id": "STORAGE-03",
+  "name": "Storage account minimum TLS version below 1.2",
+  "description": "A storage account allows TLS versions below 1.2. TLS 1.0 and 1.1 have known vulnerabilities (POODLE, BEAST) and are deprecated. Microsoft will enforce TLS 1.2 minimum across Azure services.",
+  "severity": "MEDIUM",
+  "service": "storage",
+  "path": "storage.accounts.*",
+  "conditions": ["minimumTlsVersion", "notEqual", "TLS1_2"],
+  "remediation": "Set MinimumTlsVersion=TLS1_2 on all storage accounts. Use Azure Policy to enforce this at scale. Update any clients that require older TLS versions.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "3.15"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "4.2.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version"
+  ]
+}

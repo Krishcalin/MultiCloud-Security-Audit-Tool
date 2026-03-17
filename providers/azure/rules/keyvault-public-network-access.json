@@ -1,0 +1,20 @@
+{
+  "id": "KV-04",
+  "name": "Key Vault accessible from public network",
+  "description": "The Key Vault has public network access enabled without network ACL restrictions. An internet-accessible Key Vault dramatically increases the attack surface for credential theft and secret exfiltration.",
+  "severity": "HIGH",
+  "service": "keyvault",
+  "path": "keyvault.vaults.*",
+  "conditions": ["and",
+    ["publicNetworkAccess", "equal", "Enabled"],
+    ["networkAcls.defaultAction", "equal", "Allow"]
+  ],
+  "remediation": "Restrict Key Vault network access: Set Default Action to 'Deny' and add specific VNet/IP rules, or disable public network access entirely and use Private Endpoints. Use Azure RBAC for access control instead of vault access policies.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.2"},
+    {"name": "GDPR", "article": "32"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/key-vault/general/network-security"
+  ]
+}

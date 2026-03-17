@@ -1,0 +1,17 @@
+{
+  "id": "KV-01",
+  "name": "Key Vault soft delete not enabled",
+  "description": "Key Vault soft delete is not enabled. Without soft delete, keys, secrets, and certificates deleted from the vault are permanently destroyed immediately — causing irreversible data loss and cryptographic outages.",
+  "severity": "HIGH",
+  "service": "keyvault",
+  "path": "keyvault.vaults.*",
+  "conditions": ["enableSoftDelete", "false"],
+  "remediation": "Enable soft delete with a minimum retention of 90 days. As of Azure SDK 4.0, soft delete is always-on for new vaults. For existing vaults: az keyvault update --name <vault> --enable-soft-delete true. Combine with purge protection.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.4"},
+    {"name": "DORA", "reference": "Art. 9"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview"
+  ]
+}

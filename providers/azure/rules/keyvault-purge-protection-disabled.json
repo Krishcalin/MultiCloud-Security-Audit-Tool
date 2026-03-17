@@ -1,0 +1,16 @@
+{
+  "id": "KV-02",
+  "name": "Key Vault purge protection not enabled",
+  "description": "Purge protection is not enabled on the Key Vault. Without purge protection, a malicious or mistaken purge of soft-deleted vault objects will permanently destroy encryption keys, secrets, and certificates — causing data loss.",
+  "severity": "HIGH",
+  "service": "keyvault",
+  "path": "keyvault.vaults.*",
+  "conditions": ["enablePurgeProtection", "false"],
+  "remediation": "Enable purge protection: az keyvault update --name <vault> --enable-purge-protection true. Note: purge protection cannot be disabled once enabled. Requires soft delete to be enabled first. This is mandatory for Key Vaults used with Azure Disk Encryption or Managed HSM.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.5"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview#purge-protection"
+  ]
+}

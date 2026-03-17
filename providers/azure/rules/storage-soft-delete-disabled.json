@@ -1,0 +1,17 @@
+{
+  "id": "STORAGE-04",
+  "name": "Storage account blob soft delete not enabled",
+  "description": "Blob soft delete is not enabled on the storage account. Without soft delete, accidentally or maliciously deleted blobs are permanently lost. Ransomware attacks frequently target storage accounts.",
+  "severity": "MEDIUM",
+  "service": "storage",
+  "path": "storage.accounts.*",
+  "conditions": ["blobServiceProperties.softDeleteEnabled", "false"],
+  "remediation": "Enable blob soft delete with a minimum retention of 7 days. Also enable container soft delete. Consider Azure Backup for critical storage accounts. Use Azure Policy to enforce soft delete at scale.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "3.10"},
+    {"name": "DORA", "reference": "Art. 9"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/storage/blobs/soft-delete-blob-overview"
+  ]
+}

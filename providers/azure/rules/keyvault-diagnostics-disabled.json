@@ -1,0 +1,17 @@
+{
+  "id": "KV-03",
+  "name": "Key Vault diagnostic logging not enabled",
+  "description": "Diagnostic logging is not enabled on the Key Vault. Without audit logs, access to secrets, keys, and certificates cannot be monitored — making it impossible to detect unauthorized access or key exfiltration.",
+  "severity": "MEDIUM",
+  "service": "keyvault",
+  "path": "keyvault.vaults.*",
+  "conditions": ["diagnosticsEnabled", "false"],
+  "remediation": "Enable diagnostic settings on all Key Vaults to send AuditEvent logs to Log Analytics or a Storage Account. Set retention to at least 90 days. Create alerts for high-volume access or access from unexpected IPs.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.7"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.2"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/key-vault/general/logging"
+  ]
+}

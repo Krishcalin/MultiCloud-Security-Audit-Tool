@@ -1,0 +1,17 @@
+{
+  "id": "STORAGE-02",
+  "name": "Storage account allows public blob access",
+  "description": "The storage account has AllowBlobPublicAccess enabled, allowing containers and blobs to be made publicly accessible. This is a leading cause of accidental data exposure in Azure environments.",
+  "severity": "HIGH",
+  "service": "storage",
+  "path": "storage.accounts.*",
+  "conditions": ["allowBlobPublicAccess", "true"],
+  "remediation": "Set AllowBlobPublicAccess=false at the account level: az storage account update --allow-blob-public-access false. Enforce via Azure Policy ('Storage account public access should be disallowed'). Review existing public containers and revoke anonymous access.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "3.7"},
+    {"name": "GDPR", "article": "32"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/storage/blobs/anonymous-read-access-prevent"
+  ]
+}

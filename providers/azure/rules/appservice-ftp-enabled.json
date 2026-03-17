@@ -1,0 +1,16 @@
+{
+  "id": "APP-02",
+  "name": "App Service FTP deployment not disabled",
+  "description": "FTP or FTPS deployment is enabled on an App Service. FTP does not encrypt credentials or data (FTPS only encrypts the control channel). FTP access provides a deployment vector that can bypass application-level security controls.",
+  "severity": "MEDIUM",
+  "service": "appservice",
+  "path": "appservice.apps.*",
+  "conditions": ["ftpState", "notEqual", "Disabled"],
+  "remediation": "Disable FTP deployment: App Service → Configuration → General settings → FTP state → Disabled. Use Azure DevOps, GitHub Actions, or VS Code for secure deployments. If FTPS is needed temporarily, restrict source IPs via App Service Access Restrictions.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "9.10"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/app-service/deploy-ftp"
+  ]
+}

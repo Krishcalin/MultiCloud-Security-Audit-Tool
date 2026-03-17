@@ -1,0 +1,17 @@
+{
+  "id": "APP-01",
+  "name": "App Service does not enforce HTTPS only",
+  "description": "An Azure App Service or Function App allows HTTP connections. Data transmitted over HTTP is unencrypted and visible to anyone with network access, including session tokens and API keys.",
+  "severity": "HIGH",
+  "service": "appservice",
+  "path": "appservice.apps.*",
+  "conditions": ["httpsOnly", "false"],
+  "remediation": "Enable HTTPS Only on all App Services: Azure Portal → App Service → TLS/SSL settings → HTTPS Only → On. Also set Minimum TLS Version to 1.2. Use Azure Front Door or Application Gateway WAF for additional TLS termination and header security.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "9.2"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "4.2"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-bindings"
+  ]
+}

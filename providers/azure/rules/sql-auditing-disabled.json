@@ -1,0 +1,18 @@
+{
+  "id": "SQL-02",
+  "name": "Azure SQL Server auditing not enabled",
+  "description": "Server-level auditing is not enabled on the SQL Server. Without auditing, there is no record of who accessed the database, what queries were executed, or what data was modified — preventing incident investigation.",
+  "severity": "HIGH",
+  "service": "sql",
+  "path": "sql.servers.*",
+  "conditions": ["auditingEnabled", "false"],
+  "remediation": "Enable SQL Server auditing to Log Analytics, Event Hubs, or Storage Account. Set audit retention to at least 90 days. Enable Advanced Threat Protection to alert on anomalous database activity. Consider Defender for SQL for UEBA-style SQL anomaly detection.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "4.1.1"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.2"},
+    {"name": "HIPAA", "reference": "164.312(b)"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/azure-sql/database/auditing-overview"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "ENTRA-02",
+  "name": "MFA not enforced for all users",
+  "description": "Not all enabled member users have MFA authentication methods registered. Without MFA, accounts are vulnerable to credential theft, phishing, and password spray attacks — the leading cause of Azure breaches.",
+  "severity": "CRITICAL",
+  "service": "entra",
+  "path": "entra.mfa_enforced_all_users",
+  "conditions": [".", "false"],
+  "remediation": "Enforce MFA for all users via: (1) Conditional Access policy requiring MFA for all users and all cloud apps, OR (2) Enable Security Defaults. Use FIDO2 security keys or Microsoft Authenticator for phishing-resistant MFA. Run MFA registration campaign via Entra ID Protection.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "1.1.2"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "8.4"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-all-users-mfa"
+  ]
+}

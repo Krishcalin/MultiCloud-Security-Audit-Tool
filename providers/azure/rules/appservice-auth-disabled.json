@@ -1,0 +1,16 @@
+{
+  "id": "APP-03",
+  "name": "App Service authentication not enabled",
+  "description": "Azure App Service built-in authentication (Easy Auth) is not enabled. Without authentication, the application is accessible to anonymous users — relying entirely on application-level auth which may have vulnerabilities.",
+  "severity": "MEDIUM",
+  "service": "appservice",
+  "path": "appservice.apps.*",
+  "conditions": ["authEnabled", "false"],
+  "remediation": "Enable App Service Authentication: Configuration → Authentication → Add identity provider. Use Entra ID as the identity provider for internal apps. This adds authentication at the platform level, independent of application code. Combine with Conditional Access for MFA enforcement.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "9.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization"
+  ]
+}

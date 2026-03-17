@@ -1,0 +1,17 @@
+{
+  "id": "ENTRA-01",
+  "name": "Entra ID security defaults not enabled",
+  "description": "Microsoft Entra ID Security Defaults are disabled. Security Defaults enforce MFA for all users, block legacy authentication protocols, and protect privileged actions — providing a baseline of identity security at no extra cost.",
+  "severity": "HIGH",
+  "service": "entra",
+  "path": "entra.security_defaults",
+  "conditions": ["isEnabled", "false"],
+  "remediation": "Enable Security Defaults in Entra ID: Azure Portal → Entra ID → Properties → Manage security defaults → Enable. Note: Security Defaults cannot coexist with Conditional Access policies. Prefer Conditional Access for fine-grained control in E3/E5 tenants.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "1.1.1"},
+    {"name": "NIST SP 800-63B", "reference": "5.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "ENTRA-03",
+  "name": "Legacy authentication protocols not blocked",
+  "description": "No Conditional Access policy blocks legacy authentication protocols (Exchange ActiveSync, POP3, IMAP, SMTP AUTH). Legacy auth does not support MFA, making it a primary attack vector for password spray campaigns.",
+  "severity": "HIGH",
+  "service": "entra",
+  "path": "entra.legacy_auth_blocked",
+  "conditions": [".", "false"],
+  "remediation": "Create a Conditional Access policy: Assignments → All users, Cloud apps → All cloud apps, Conditions → Client apps → select 'Exchange ActiveSync clients' and 'Other clients', Grant → Block access. Sign-in logs show legacy auth volume before enforcing. Provide migration path for users on legacy clients.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "1.1.3"},
+    {"name": "NIST SP 800-63B", "reference": "6.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/entra/identity/conditional-access/block-legacy-authentication"
+  ]
+}

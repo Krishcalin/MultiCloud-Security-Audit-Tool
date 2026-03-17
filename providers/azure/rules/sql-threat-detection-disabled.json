@@ -1,0 +1,16 @@
+{
+  "id": "SQL-03",
+  "name": "Advanced Threat Protection not enabled on SQL Server",
+  "description": "Microsoft Defender for SQL / Advanced Threat Protection is not enabled. Without it, SQL injection attempts, unusual access patterns, and data exfiltration go undetected.",
+  "severity": "MEDIUM",
+  "service": "sql",
+  "path": "sql.servers.*",
+  "conditions": ["threatDetectionEnabled", "false"],
+  "remediation": "Enable Advanced Threat Protection: Azure Portal → SQL Server → Security → Microsoft Defender for SQL → Enable. Configure email alerts for security administrators. Also enable Vulnerability Assessment to identify and remediate configuration gaps.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "4.1.2"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/azure-sql/database/threat-detection-configure"
+  ]
+}

@@ -11,14 +11,16 @@ Usage
     # AWS live audit  (Phase 2 — coming soon)
     python scout.py aws --region us-east-1 --html aws_report.html
 
-    # Azure live audit (Phase 3 — coming soon)
+    # Azure live audit  (Phase 3)
     python scout.py azure --subscription-id <SUB_ID> --html azure_report.html
 
     # GCP live audit   (Phase 4 — coming soon)
     python scout.py gcp --project <PROJECT_ID> --html gcp_report.html
 
 Phase 1 delivers the core engine, base classes, and the ``demo`` subcommand.
-Provider subcommands (aws / azure / gcp) are enabled in later phases.
+Phase 2 adds the AWS live provider (CIS AWS Foundations v3.0).
+Phase 3 adds the Azure live provider (CIS Azure Foundations v2.0).
+Phase 4 (GCP) is coming soon.
 """
 
 from __future__ import annotations
@@ -416,7 +418,7 @@ Examples:
     aws_p.add_argument("-v", "--verbose", action="store_true")
 
     # ---- azure (Phase 3) ----
-    az_p = sub.add_parser("azure", help="Audit an Azure subscription (Phase 3 — coming soon)")
+    az_p = sub.add_parser("azure", help="Audit an Azure subscription (CIS Azure Foundations v2.0)")
     az_p.add_argument("--subscription-id", metavar="SUB_ID")
     az_p.add_argument("--tenant-id",       metavar="TENANT_ID")
     az_p.add_argument("--client-id",       metavar="CLIENT_ID")
@@ -601,8 +603,113 @@ def _run_aws(args: argparse.Namespace) -> int:
     return 1 if any(f.severity in ("CRITICAL", "HIGH") for f in findings) else 0
 
 
+def _run_azure(args: argparse.Namespace) -> int:
+    """Live Azure subscription audit — Phase 3."""
+    from core.ruleset import Ruleset
+    from core.engine import ProcessingEngine
+    from output.encoder import save_json
+    from output.report import save_html
+
+    sub_id = args.subscription_id
+    if not sub_id:
+        print("[!] --subscription-id is required for the azure provider.")
+        return 2
+
+    print(f"[*] MultiCloud Security Audit Tool v{__version__}")
+    print(f"[*] Provider      : Azure")
+    print(f"[*] Subscription  : {sub_id}")
+    if args.tenant_id:
+        print(f"[*] Tenant        : {args.tenant_id}")
+    print()
+
+    # --- Import provider (requires azure-* packages) ---
+    try:
+        from providers.azure import AzureProvider
+    except ImportError as exc:
+        print(f"[!] Azure SDK not installed: {exc}")
+        print("    Run: pip install azure-identity azure-mgmt-compute azure-mgmt-storage "
+              "azure-mgmt-network azure-mgmt-resource azure-mgmt-authorization "
+              "azure-mgmt-keyvault azure-mgmt-monitor azure-mgmt-security "
+              "azure-mgmt-sql msgraph-sdk")
+        return 2
+
+    # --- Load ruleset ---
+    _rules_dir = Path(__file__).parent / "providers" / "azure" / "rules"
+    ruleset_path = _rules_dir / "azure-cis-2.0-ruleset.json"
+    if not ruleset_path.exists():
+        print(f"[!] Ruleset not found: {ruleset_path}")
+        return 2
+
+    try:
+        ruleset = Ruleset(ruleset_path, rule_dirs=[str(_rules_dir)])
+    except Exception as exc:
+        print(f"[!] Failed to load ruleset: {exc}")
+        return 2
+
+    print(f"[*] Ruleset       : {ruleset_path.name} ({len(ruleset)} rules)")
+    print()
+
+    # --- Fetch data ---
+    provider = AzureProvider(
+        subscription_id=sub_id,
+        tenant_id=args.tenant_id,
+        client_id=args.client_id,
+        client_secret=args.client_secret,
+        verbose=args.verbose,
+    )
+    print("[*] Connecting to Azure …")
+    try:
+        provider.fetch_sync()
+    except Exception as exc:
+        print(f"[!] Azure fetch failed: {exc}")
+        return 2
+
+    subscription_name = provider.account_name or sub_id
+    print(f"[*] Subscription  : {subscription_name}")
+    print()
+
+    # --- Run engine ---
+    engine = ProcessingEngine(ruleset)
+    findings = engine.run(provider.get_data(), provider="azure")
+
+    # --- Console summary ---
+    from collections import Counter
+    sev_c = Counter(f.severity for f in findings)
+    print(f"  Findings : {len(findings)}")
+    for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]:
+        count = sev_c.get(sev, 0)
+        if count:
+            print(f"  {sev:<10}: {count}")
+    print()
+
+    meta = {
+        "scan_date":    datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "account":      subscription_name,
+        "subscription": sub_id,
+        "version":      __version__,
+    }
+
+    # --- Save outputs ---
+    if args.json:
+        save_json(findings, args.json)
+        print(f"[+] JSON report saved to: {args.json}")
+
+    safe_sub = sub_id.replace("-", "")[:12]
+    html_path = args.html or f"azure_{safe_sub}_report.html"
+    save_html(findings, html_path, meta=meta)
+    print(f"[+] HTML report saved to: {html_path}")
+
+    import webbrowser
+    try:
+        webbrowser.open(str(Path(html_path).resolve().as_uri()))
+    except Exception:
+        pass
+
+    return 1 if any(f.severity in ("CRITICAL", "HIGH") for f in findings) else 0
+
+
 def _run_coming_soon(provider: str) -> int:
-    phase_map = {"azure": 3, "gcp": 4}
+    phase_map = {"gcp": 4}
     phase = phase_map.get(provider, "?")
     print(f"[*] MultiCloud Security Audit Tool v{__version__}")
     print(f"[!] Provider '{provider.upper()}' is implemented in Phase {phase}.")
@@ -622,7 +729,9 @@ def main() -> int:
         return _run_demo(args)
     elif args.provider == "aws":
         return _run_aws(args)
-    elif args.provider in ("azure", "gcp"):
+    elif args.provider == "azure":
+        return _run_azure(args)
+    elif args.provider == "gcp":
         return _run_coming_soon(args.provider)
     else:
         parser.print_help()

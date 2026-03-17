@@ -1,0 +1,16 @@
+{
+  "id": "ENTRA-04",
+  "name": "Guest users present in the tenant",
+  "description": "One or more guest (B2B) users are present in the Entra ID tenant. Guest users with unnecessary permissions can be exploited for lateral movement and data exfiltration if their home tenant is compromised.",
+  "severity": "LOW",
+  "service": "entra",
+  "path": "entra.guest_users",
+  "conditions": [".", "notEmpty"],
+  "remediation": "Review all guest users. Remove guests who no longer require access. Restrict guest permissions using Entra ID External Collaboration Settings. Apply Conditional Access policies that require MFA and compliant devices for guest users. Implement quarterly access reviews via Entra Identity Governance.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "1.4"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b"
+  ]
+}
