@@ -487,6 +487,14 @@ def _run_demo(args: argparse.Namespace) -> int:
         "version":   __version__,
     }
 
+    # --- Posture score ---
+    from core.scoring import compute_score
+    from core.compliance import aggregate_compliance
+    posture    = compute_score(findings)
+    compliance = aggregate_compliance(findings)
+    print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
+    print()
+
     # Save JSON
     if args.json:
         save_json(findings, args.json)
@@ -494,7 +502,7 @@ def _run_demo(args: argparse.Namespace) -> int:
 
     # Save HTML
     html_path = args.html or "multicloud_report.html"
-    save_html(findings, html_path, meta=meta)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
     print(f"[+] HTML report saved to: {html_path}")
 
     # Open in browser
@@ -585,13 +593,21 @@ def _run_aws(args: argparse.Namespace) -> int:
         "version":   __version__,
     }
 
+    # --- Posture score ---
+    from core.scoring import compute_score
+    from core.compliance import aggregate_compliance
+    posture    = compute_score(findings)
+    compliance = aggregate_compliance(findings)
+    print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
+    print()
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
         print(f"[+] JSON report saved to: {args.json}")
 
     html_path = args.html or f"aws_{account_id}_report.html"
-    save_html(findings, html_path, meta=meta)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser
@@ -689,6 +705,14 @@ def _run_azure(args: argparse.Namespace) -> int:
         "version":      __version__,
     }
 
+    # --- Posture score ---
+    from core.scoring import compute_score
+    from core.compliance import aggregate_compliance
+    posture    = compute_score(findings)
+    compliance = aggregate_compliance(findings)
+    print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
+    print()
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
@@ -696,7 +720,7 @@ def _run_azure(args: argparse.Namespace) -> int:
 
     safe_sub = sub_id.replace("-", "")[:12]
     html_path = args.html or f"azure_{safe_sub}_report.html"
-    save_html(findings, html_path, meta=meta)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser
@@ -790,6 +814,14 @@ def _run_gcp(args: argparse.Namespace) -> int:
         "version":   __version__,
     }
 
+    # --- Posture score ---
+    from core.scoring import compute_score
+    from core.compliance import aggregate_compliance
+    posture    = compute_score(findings)
+    compliance = aggregate_compliance(findings)
+    print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
+    print()
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
@@ -797,7 +829,7 @@ def _run_gcp(args: argparse.Namespace) -> int:
 
     safe_proj = project_id.replace("-", "_")[:20]
     html_path = args.html or f"gcp_{safe_proj}_report.html"
-    save_html(findings, html_path, meta=meta)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser
