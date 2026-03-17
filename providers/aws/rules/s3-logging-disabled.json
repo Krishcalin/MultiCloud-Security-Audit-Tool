@@ -1,0 +1,17 @@
+{
+  "id": "S3-03",
+  "name": "S3 server access logging not enabled",
+  "description": "S3 server access logging is disabled for one or more buckets. Without access logs, it is impossible to audit bucket access, detect data exfiltration, or satisfy compliance audit requirements.",
+  "severity": "MEDIUM",
+  "service": "s3",
+  "path": "s3.buckets.*",
+  "conditions": ["Logging", "null"],
+  "remediation": "Enable server access logging for all S3 buckets. Send logs to a dedicated, encrypted, versioned audit bucket. Consider using AWS CloudTrail Data Events for API-level S3 audit logs.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.6"},
+    {"name": "HIPAA", "reference": "164.312(b)"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html"
+  ]
+}

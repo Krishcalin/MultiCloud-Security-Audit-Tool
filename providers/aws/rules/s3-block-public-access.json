@@ -1,0 +1,22 @@
+{
+  "id": "S3-01",
+  "name": "S3 Block Public Access not fully enabled",
+  "description": "One or more S3 buckets have Block Public Access disabled. Buckets without full Block Public Access can be made public via ACLs or bucket policies, exposing sensitive data to the internet.",
+  "severity": "HIGH",
+  "service": "s3",
+  "path": "s3.buckets.*",
+  "conditions": ["or",
+    ["PublicAccessBlock.BlockPublicAcls",       "false"],
+    ["PublicAccessBlock.BlockPublicPolicy",     "false"],
+    ["PublicAccessBlock.IgnorePublicAcls",      "false"],
+    ["PublicAccessBlock.RestrictPublicBuckets", "false"]
+  ],
+  "remediation": "Enable all four Block Public Access settings at both the account level (S3 > Block Public Access settings for this account) and per-bucket. Use bucket policies with explicit Deny for s3:GetObject to non-authenticated principals.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.1.4"},
+    {"name": "GDPR", "article": "32"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "RDS-04",
+  "name": "RDS deletion protection not enabled",
+  "description": "RDS deletion protection is disabled. Without deletion protection, an authorised user (or compromised credential) can accidentally or maliciously delete the database and all its data permanently.",
+  "severity": "MEDIUM",
+  "service": "rds",
+  "path": "rds.instances.*",
+  "conditions": ["DeletionProtection", "false"],
+  "remediation": "Enable deletion protection on all production RDS instances: aws rds modify-db-instance --db-instance-identifier <id> --deletion-protection. Apply SCP to prevent deletion-protection disablement in production accounts.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.3.4"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html"
+  ]
+}

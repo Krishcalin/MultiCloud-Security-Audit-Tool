@@ -1,0 +1,21 @@
+{
+  "id": "KMS-01",
+  "name": "KMS customer-managed key rotation not enabled",
+  "description": "Automatic annual rotation is disabled for a customer-managed KMS key. Long-lived cryptographic keys increase the risk of key compromise. If a key is breached, all data encrypted with it is permanently exposed.",
+  "severity": "MEDIUM",
+  "service": "kms",
+  "path": "kms.keys.*",
+  "conditions": ["and",
+    ["KeyManager", "equal", "CUSTOMER"],
+    ["KeyState", "equal", "Enabled"],
+    ["KeyRotationEnabled", "false"]
+  ],
+  "remediation": "Enable annual automatic key rotation: aws kms enable-key-rotation --key-id <key-id>. Keys are rotated every 365 days and old key material is retained to decrypt existing ciphertext. For asymmetric keys, implement a manual rotation procedure.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.7"},
+    {"name": "NIST SP 800-57", "reference": "Part 1 Rev 5"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
+  ]
+}

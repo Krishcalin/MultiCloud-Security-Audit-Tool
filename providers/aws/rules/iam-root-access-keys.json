@@ -1,0 +1,16 @@
+{
+  "id": "IAM-02",
+  "name": "Root account access keys exist",
+  "description": "Active access keys exist for the AWS root account. Root access keys provide programmatic full-admin access and should never be used. Any root access keys should be deleted immediately.",
+  "severity": "CRITICAL",
+  "service": "iam",
+  "path": "iam.account_root_access_keys",
+  "conditions": [".", "true"],
+  "remediation": "Delete all root account access keys in the AWS IAM console. Use IAM roles and least-privilege IAM users for all programmatic access. Enable SCPs to prevent future root key creation.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "1.4"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_delete-key"
+  ]
+}

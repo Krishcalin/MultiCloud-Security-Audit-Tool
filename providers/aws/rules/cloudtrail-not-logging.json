@@ -1,0 +1,17 @@
+{
+  "id": "CT-01",
+  "name": "CloudTrail trail not logging",
+  "description": "A CloudTrail trail exists but is not actively logging. When logging is stopped, all API activity in the account goes unrecorded, providing attackers with a window to operate without forensic evidence.",
+  "severity": "CRITICAL",
+  "service": "cloudtrail",
+  "path": "cloudtrail.trails.*",
+  "conditions": ["IsLogging", "false"],
+  "remediation": "Re-enable CloudTrail logging immediately: aws cloudtrail start-logging --name <trail-name>. Implement an AWS Config rule (cloud-trail-enabled) and an SNS alert for CloudTrail logging state changes.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.1"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.2"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-getting-started.html"
+  ]
+}

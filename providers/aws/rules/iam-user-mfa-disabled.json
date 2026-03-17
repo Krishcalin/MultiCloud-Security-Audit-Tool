@@ -1,0 +1,20 @@
+{
+  "id": "IAM-05",
+  "name": "Console user without MFA",
+  "description": "IAM users with console (password-based) access do not have MFA enabled, leaving the account vulnerable to credential theft, phishing, and password spray attacks.",
+  "severity": "HIGH",
+  "service": "iam",
+  "path": "iam.users.*",
+  "conditions": ["and",
+    ["LoginProfile", "notNull"],
+    ["MFADevices", "empty"]
+  ],
+  "remediation": "Enable MFA for all IAM users with console access. Enforce MFA via an IAM policy condition on 'aws:MultiFactorAuthPresent'. Consider migrating to IAM Identity Center (SSO) with MFA.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "1.10"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "8.4"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+  ]
+}

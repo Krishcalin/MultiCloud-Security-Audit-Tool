@@ -1,0 +1,17 @@
+{
+  "id": "GD-01",
+  "name": "GuardDuty detector disabled",
+  "description": "Amazon GuardDuty is not enabled. Without GuardDuty, there is no threat detection for compromised credentials, cryptocurrency mining, port scanning, DNS exfiltration, or malicious instance behaviour.",
+  "severity": "HIGH",
+  "service": "guardduty",
+  "path": "guardduty.detectors.*",
+  "conditions": ["Status", "notEqual", "ENABLED"],
+  "remediation": "Enable GuardDuty in all regions: aws guardduty create-detector --enable --finding-publishing-frequency FIFTEEN_MINUTES. Enable optional protection plans: S3, EKS, RDS, Lambda, Malware. Configure EventBridge rules to route HIGH/CRITICAL findings to PagerDuty or SNS.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "4.9"},
+    {"name": "AWS Well-Architected", "pillar": "Security", "reference": "SEC 10"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "RDS-03",
+  "name": "RDS automated backups disabled",
+  "description": "RDS automated backup retention period is set to 0 days, effectively disabling backups. This prevents point-in-time recovery in the event of data loss, corruption, or ransomware.",
+  "severity": "MEDIUM",
+  "service": "rds",
+  "path": "rds.instances.*",
+  "conditions": ["BackupRetentionPeriod", "equal", 0],
+  "remediation": "Set BackupRetentionPeriod to at least 7 days. For compliance-sensitive workloads, use 35 days (the maximum). Combine with AWS Backup for cross-region backup copies.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.3.2"},
+    {"name": "DORA", "reference": "Art. 9"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html"
+  ]
+}

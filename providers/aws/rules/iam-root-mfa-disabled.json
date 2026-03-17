@@ -1,0 +1,18 @@
+{
+  "id": "IAM-01",
+  "name": "Root account MFA not enabled",
+  "description": "The AWS root account does not have multi-factor authentication (MFA) enabled. The root account has unrestricted access to all AWS resources and should be protected with the strongest available authentication.",
+  "severity": "CRITICAL",
+  "service": "iam",
+  "path": "iam.account_summary",
+  "conditions": ["AccountMFAEnabled", "equal", 0],
+  "remediation": "Enable MFA for the root account in the AWS IAM console under 'Security credentials'. Use a hardware MFA device (e.g. YubiKey) for root accounts. Avoid using virtual MFA for root.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "1.5"},
+    {"name": "AWS Well-Architected", "pillar": "Security", "reference": "SEC 02"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html",
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html"
+  ]
+}

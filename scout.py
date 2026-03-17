@@ -34,7 +34,7 @@ from typing import Any, Dict, List
 # Version
 # ---------------------------------------------------------------------------
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 # ---------------------------------------------------------------------------
 # Demo data — exercises every engine feature and all severity levels
@@ -406,7 +406,7 @@ Examples:
     demo_p.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     # ---- aws (Phase 2) ----
-    aws_p = sub.add_parser("aws", help="Audit a live AWS account (Phase 2 — coming soon)")
+    aws_p = sub.add_parser("aws", help="Audit a live AWS account (CIS AWS Foundations v3.0)")
     aws_p.add_argument("--region",   default="eu-west-1", metavar="REGION", help="AWS region (default: eu-west-1)")
     aws_p.add_argument("--profile",  metavar="PROFILE",   help="AWS named profile")
     aws_p.add_argument("--sections", nargs="+",           metavar="SECTION", help="Run specific sections only")
@@ -507,8 +507,102 @@ def _run_demo(args: argparse.Namespace) -> int:
     return 1 if has_critical else 0
 
 
+def _run_aws(args: argparse.Namespace) -> int:
+    """Live AWS account audit — Phase 2."""
+    from core.ruleset import Ruleset
+    from core.engine import ProcessingEngine
+    from output.encoder import save_json
+    from output.report import save_html
+
+    print(f"[*] MultiCloud Security Audit Tool v{__version__}")
+    print(f"[*] Provider : AWS")
+    print(f"[*] Region   : {args.region}")
+    if args.profile:
+        print(f"[*] Profile  : {args.profile}")
+    print()
+
+    # --- Import provider (requires boto3) ---
+    try:
+        from providers.aws import AWSProvider
+    except ImportError as exc:
+        print(f"[!] {exc}")
+        return 2
+
+    # --- Load ruleset ---
+    _rules_dir = Path(__file__).parent / "providers" / "aws" / "rules"
+    ruleset_path = Path(args.ruleset) if args.ruleset else (_rules_dir / "aws-cis-3.0-ruleset.json")
+    if not ruleset_path.exists():
+        print(f"[!] Ruleset not found: {ruleset_path}")
+        return 2
+
+    try:
+        ruleset = Ruleset(ruleset_path, rule_dirs=[str(_rules_dir)])
+    except Exception as exc:
+        print(f"[!] Failed to load ruleset: {exc}")
+        return 2
+
+    print(f"[*] Ruleset  : {ruleset_path.name} ({len(ruleset)} rules)")
+    print()
+
+    # --- Fetch data ---
+    provider = AWSProvider(
+        region=args.region,
+        profile=args.profile,
+        services=args.sections if args.sections else None,
+        verbose=args.verbose,
+    )
+    print("[*] Connecting to AWS …")
+    try:
+        provider.fetch_sync()
+    except Exception as exc:
+        print(f"[!] AWS fetch failed: {exc}")
+        return 2
+
+    account_id = provider.account_id
+    print(f"[*] Account  : {account_id}")
+    print()
+
+    # --- Run engine ---
+    engine = ProcessingEngine(ruleset)
+    findings = engine.run(provider.get_data(), provider="aws")
+
+    # --- Console summary ---
+    from collections import Counter
+    sev_c = Counter(f.severity for f in findings)
+    print(f"  Findings : {len(findings)}")
+    for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]:
+        count = sev_c.get(sev, 0)
+        if count:
+            print(f"  {sev:<10}: {count}")
+    print()
+
+    meta = {
+        "scan_date": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "account":   account_id,
+        "region":    args.region,
+        "version":   __version__,
+    }
+
+    # --- Save outputs ---
+    if args.json:
+        save_json(findings, args.json)
+        print(f"[+] JSON report saved to: {args.json}")
+
+    html_path = args.html or f"aws_{account_id}_report.html"
+    save_html(findings, html_path, meta=meta)
+    print(f"[+] HTML report saved to: {html_path}")
+
+    import webbrowser
+    try:
+        webbrowser.open(str(Path(html_path).resolve().as_uri()))
+    except Exception:
+        pass
+
+    return 1 if any(f.severity in ("CRITICAL", "HIGH") for f in findings) else 0
+
+
 def _run_coming_soon(provider: str) -> int:
-    phase_map = {"aws": 2, "azure": 3, "gcp": 4}
+    phase_map = {"azure": 3, "gcp": 4}
     phase = phase_map.get(provider, "?")
     print(f"[*] MultiCloud Security Audit Tool v{__version__}")
     print(f"[!] Provider '{provider.upper()}' is implemented in Phase {phase}.")
@@ -526,7 +620,9 @@ def main() -> int:
 
     if args.provider == "demo":
         return _run_demo(args)
-    elif args.provider in ("aws", "azure", "gcp"):
+    elif args.provider == "aws":
+        return _run_aws(args)
+    elif args.provider in ("azure", "gcp"):
         return _run_coming_soon(args.provider)
     else:
         parser.print_help()

@@ -1,0 +1,16 @@
+{
+  "id": "CT-03",
+  "name": "CloudTrail not configured as multi-region trail",
+  "description": "The CloudTrail trail is not a multi-region trail. Single-region trails miss API activity in other regions, leaving blind spots that attackers can exploit by operating in unmonitored regions.",
+  "severity": "HIGH",
+  "service": "cloudtrail",
+  "path": "cloudtrail.trails.*",
+  "conditions": ["IsMultiRegionTrail", "false"],
+  "remediation": "Update the trail to be multi-region: aws cloudtrail update-trail --name <trail> --is-multi-region-trail --include-global-service-events. Ensure global service events (IAM, STS, CloudFront) are included.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.1"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/receive-cloudtrail-log-files-from-multiple-regions.html"
+  ]
+}

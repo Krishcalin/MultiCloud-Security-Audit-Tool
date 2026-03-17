@@ -1,0 +1,17 @@
+{
+  "id": "CT-02",
+  "name": "CloudTrail log file validation disabled",
+  "description": "CloudTrail log file validation is not enabled. Without it, attackers who compromise the S3 bucket can modify or delete audit logs without detection — removing all forensic evidence of their activity.",
+  "severity": "HIGH",
+  "service": "cloudtrail",
+  "path": "cloudtrail.trails.*",
+  "conditions": ["LogFileValidationEnabled", "false"],
+  "remediation": "Enable log file validation: aws cloudtrail update-trail --name <trail> --enable-log-file-validation. Use aws cloudtrail validate-logs to periodically verify integrity. Store logs in a dedicated, locked-down S3 bucket with Object Lock.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.2"},
+    {"name": "SOC 2", "reference": "CC7.2"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+  ]
+}

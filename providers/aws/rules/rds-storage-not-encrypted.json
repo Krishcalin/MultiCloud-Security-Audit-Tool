@@ -1,0 +1,17 @@
+{
+  "id": "RDS-02",
+  "name": "RDS storage encryption not enabled",
+  "description": "RDS storage encryption is disabled. Database data at rest — including automated backups, read replicas, and snapshots — is stored in plaintext, violating data protection requirements.",
+  "severity": "HIGH",
+  "service": "rds",
+  "path": "rds.instances.*",
+  "conditions": ["StorageEncrypted", "false"],
+  "remediation": "Enable storage encryption. Note: RDS encryption can only be enabled at creation time. Migrate existing unencrypted instances by: (1) take a snapshot, (2) copy snapshot with encryption, (3) restore to a new encrypted instance, (4) update DNS/connection strings, (5) decommission old instance.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.3.1"},
+    {"name": "HIPAA", "reference": "164.312(a)(2)(iv)"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html"
+  ]
+}

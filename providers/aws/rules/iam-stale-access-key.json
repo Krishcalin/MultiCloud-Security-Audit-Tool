@@ -1,0 +1,21 @@
+{
+  "id": "IAM-10",
+  "name": "Active IAM access key not rotated in 90 days",
+  "description": "One or more active IAM access keys have not been rotated in over 90 days. Long-lived access keys are a major attack vector — a compromised key provides persistent, undetected access.",
+  "severity": "HIGH",
+  "service": "iam",
+  "path": "iam.users.*",
+  "conditions": ["and",
+    ["AccessKeys", "notEmpty"],
+    ["AccessKeys.0.Status", "equal", "Active"],
+    ["AccessKeys.0.CreateDate", "olderThanDays", 90]
+  ],
+  "remediation": "Rotate all access keys older than 90 days. Disable keys unused for 30+ days. Use IAM roles and instance profiles instead of long-term access keys where possible. Automate rotation with AWS Secrets Manager.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "1.14"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "8.6"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "about": "CIS Amazon Web Services Foundations Benchmark v3.0 — MultiCloud Security Audit Tool",
+  "rules": {
+    "iam-root-mfa-disabled.json":    [{"enabled": true, "level": "danger"}],
+    "iam-root-access-keys.json":     [{"enabled": true, "level": "danger"}],
+    "iam-user-mfa-disabled.json":    [{"enabled": true, "level": "danger"}],
+    "iam-password-policy-weak.json": [{"enabled": true, "level": "warning"}],
+    "iam-password-no-expiry.json":   [{"enabled": true, "level": "warning"}],
+    "iam-stale-access-key.json":     [{"enabled": true, "level": "danger"}],
+    "s3-block-public-access.json":   [{"enabled": true, "level": "danger"}],
+    "s3-encryption-disabled.json":   [{"enabled": true, "level": "danger"}],
+    "s3-logging-disabled.json":      [{"enabled": true, "level": "warning"}],
+    "s3-versioning-disabled.json":   [{"enabled": true, "level": "warning"}],
+    "ec2-imdsv2-disabled.json":      [{"enabled": true, "level": "danger"}],
+    "ec2-sg-ssh-open.json":          [{"enabled": true, "level": "danger"}],
+    "ec2-sg-rdp-open.json":          [{"enabled": true, "level": "danger"}],
+    "ec2-ebs-unencrypted.json":      [{"enabled": true, "level": "danger"}],
+    "rds-publicly-accessible.json":  [{"enabled": true, "level": "danger"}],
+    "rds-storage-not-encrypted.json":[{"enabled": true, "level": "danger"}],
+    "rds-no-backup.json":            [{"enabled": true, "level": "warning"}],
+    "rds-no-deletion-protection.json":[{"enabled": true, "level": "warning"}],
+    "cloudtrail-not-logging.json":   [{"enabled": true, "level": "danger"}],
+    "cloudtrail-log-validation.json":[{"enabled": true, "level": "danger"}],
+    "cloudtrail-not-multiregion.json":[{"enabled": true, "level": "danger"}],
+    "kms-key-rotation-disabled.json":[{"enabled": true, "level": "warning"}],
+    "vpc-flow-logs-disabled.json":   [{"enabled": true, "level": "warning"}],
+    "guardduty-disabled.json":       [{"enabled": true, "level": "danger"}],
+    "config-not-enabled.json":       [{"enabled": true, "level": "warning"}]
+  }
+}

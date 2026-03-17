@@ -1,0 +1,17 @@
+{
+  "id": "EC2-12",
+  "name": "EBS volume not encrypted",
+  "description": "One or more EBS volumes are not encrypted. Unencrypted volumes expose data-at-rest to physical access attacks and violate data protection requirements in regulated industries.",
+  "severity": "HIGH",
+  "service": "ec2",
+  "path": "ec2.ebs_volumes.*",
+  "conditions": ["Encrypted", "false"],
+  "remediation": "Enable EBS encryption by default at the account/region level: aws ec2 enable-ebs-encryption-by-default. For existing unencrypted volumes, create an encrypted snapshot and restore to a new encrypted volume.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.2.1"},
+    {"name": "HIPAA", "reference": "164.312(a)(2)(iv)"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html"
+  ]
+}

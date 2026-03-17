@@ -1,235 +1,278 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 200" width="960" height="200">
   <defs>
 
-    <!-- Background gradient -->
+    <!-- ── Gradients ──────────────────────────────────────────────────── -->
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%"   stop-color="#0d1117"/>
-      <stop offset="50%"  stop-color="#0f1923"/>
+      <stop offset="50%"  stop-color="#0f1c2a"/>
       <stop offset="100%" stop-color="#0d1117"/>
     </linearGradient>
 
-    <!-- Per-provider glow (radial) -->
-    <radialGradient id="glowAWS"   cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#ff9900" stop-opacity="0.16"/>
-      <stop offset="100%" stop-color="#ff9900" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glowAzure" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#0078d4" stop-opacity="0.14"/>
-      <stop offset="100%" stop-color="#0078d4" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glowGCP"   cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#34a853" stop-opacity="0.14"/>
-      <stop offset="100%" stop-color="#34a853" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Shield gradient -->
     <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#58a6ff"/>
+      <stop offset="0%"   stop-color="#79c0ff"/>
       <stop offset="100%" stop-color="#1f6feb"/>
     </linearGradient>
 
-    <!-- Title gradient -->
     <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%"   stop-color="#e6edf3"/>
-      <stop offset="70%"  stop-color="#c9d1d9"/>
+      <stop offset="65%"  stop-color="#c9d1d9"/>
       <stop offset="100%" stop-color="#8b949e"/>
     </linearGradient>
 
-    <!-- Tri-colour separator / bottom stripe -->
-    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <!-- Tri-colour stripe: AWS → Azure → GCP -->
+    <linearGradient id="stripeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%"   stop-color="#ff9900" stop-opacity="0"/>
-      <stop offset="15%"  stop-color="#ff9900"/>
+      <stop offset="12%"  stop-color="#ff9900"/>
       <stop offset="50%"  stop-color="#0078d4"/>
-      <stop offset="85%"  stop-color="#34a853"/>
+      <stop offset="88%"  stop-color="#34a853"/>
       <stop offset="100%" stop-color="#34a853" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- Clip to rounded rect -->
-    <clipPath id="roundClip">
-      <rect width="900" height="220" rx="14" ry="14"/>
+    <!-- Very subtle glow confined to each zone -->
+    <radialGradient id="glowA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ff9900" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#ff9900" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#0078d4" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0078d4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowC" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#34a853" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#34a853" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Clip so glow blobs stay inside rounded border -->
+    <clipPath id="clip">
+      <rect width="960" height="200" rx="14" ry="14"/>
     </clipPath>
 
   </defs>
 
-  <!-- ── Background ─────────────────────────────────────────────────── -->
-  <rect width="900" height="220" rx="14" ry="14" fill="url(#bg)"/>
+  <!-- ── Background ────────────────────────────────────────────────────── -->
+  <rect width="960" height="200" rx="14" ry="14" fill="url(#bg)"/>
 
-  <!-- ── Border ────────────────────────────────────────────────────── -->
-  <rect width="900" height="220" rx="14" ry="14"
+  <!-- ── Border ─────────────────────────────────────────────────────────── -->
+  <rect width="960" height="200" rx="14" ry="14"
         fill="none" stroke="#21262d" stroke-width="1.5"/>
 
-  <!-- ── Subtle grid ────────────────────────────────────────────────── -->
-  <g clip-path="url(#roundClip)" opacity="0.035" stroke="#58a6ff" stroke-width="0.5">
-    <line x1="0"   y1="55"  x2="900" y2="55"/>
-    <line x1="0"   y1="110" x2="900" y2="110"/>
-    <line x1="0"   y1="165" x2="900" y2="165"/>
-    <line x1="220" y1="0"   x2="220" y2="220"/>
-    <line x1="450" y1="0"   x2="450" y2="220"/>
-    <line x1="625" y1="0"   x2="625" y2="220"/>
+  <!-- ── Zone-confined glow blobs ──────────────────────────────────────── -->
+  <g clip-path="url(#clip)">
+    <!-- Zone A glow: centred at (120, 100) — well within x=0-240 -->
+    <ellipse cx="120" cy="100" rx="115" ry="90" fill="url(#glowA)" opacity="0.9"/>
+    <!-- Zone B glow: centred at (505, 100) — well within x=250-720 -->
+    <ellipse cx="505" cy="100" rx="200" ry="90" fill="url(#glowB)" opacity="0.7"/>
+    <!-- Zone C glow: centred at (840, 100) — well within x=730-960 -->
+    <ellipse cx="840" cy="100" rx="115" ry="90" fill="url(#glowC)" opacity="0.9"/>
   </g>
 
-  <!-- ── Provider glow blobs ─────────────────────────────────────────── -->
-  <!-- Left zone: AWS warm glow -->
-  <ellipse cx="110" cy="110" rx="110" ry="80" fill="url(#glowAWS)"   opacity="0.8"/>
-  <!-- Centre zone: Azure cool glow -->
-  <ellipse cx="423" cy="110" rx="140" ry="80" fill="url(#glowAzure)" opacity="0.6"/>
-  <!-- Right zone: GCP green glow -->
-  <ellipse cx="762" cy="110" rx="110" ry="80" fill="url(#glowGCP)"   opacity="0.7"/>
+  <!-- ── Subtle grid ────────────────────────────────────────────────────── -->
+  <g clip-path="url(#clip)" opacity="0.03" stroke="#58a6ff" stroke-width="0.5">
+    <line x1="0"   y1="50"  x2="960" y2="50"/>
+    <line x1="0"   y1="100" x2="960" y2="100"/>
+    <line x1="0"   y1="150" x2="960" y2="150"/>
+    <line x1="240" y1="0"   x2="240" y2="200"/>
+    <line x1="720" y1="0"   x2="720" y2="200"/>
+  </g>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       ZONE A  ·  LEFT  ·  x 0 – 220
-       Shield icon + three provider badges
+       ZONE A  ·  x 0 – 240  ·  centre x=120
+       Shield icon (top) + three provider badges (bottom, same row)
+       No element extends past x=228 or below y=186
        ═══════════════════════════════════════════════════════════════════ -->
 
-  <!-- Shield body (centred at x=110) -->
-  <path d="M88 36 L132 36 L140 46 L140 96 Q140 124 110 138 Q80 124 80 96 L80 46 Z"
-        fill="url(#shieldGrad)" opacity="0.12"/>
-  <path d="M88 36 L132 36 L140 46 L140 96 Q140 124 110 138 Q80 124 80 96 L80 46 Z"
-        fill="none" stroke="url(#shieldGrad)" stroke-width="1.8" opacity="0.85"/>
+  <!-- Shield body — centred at (120, 72), spans x=94–146, y=30–118 -->
+  <path d="M97 30 L143 30 L152 42 L152 94 Q152 124 120 138 Q88 124 88 94 L88 42 Z"
+        fill="url(#shieldGrad)" opacity="0.10"/>
+  <path d="M97 30 L143 30 L152 42 L152 94 Q152 124 120 138 Q88 124 88 94 L88 42 Z"
+        fill="none" stroke="url(#shieldGrad)" stroke-width="1.8" opacity="0.80"/>
 
-  <!-- Shield check-mark -->
-  <polyline points="94,88  106,102  128,68"
-            fill="none" stroke="#58a6ff" stroke-width="3.2"
-            stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  <!-- Shield check-mark — contained within x=100–140, y=70–108 -->
+  <polyline points="103,88  116,103  139,70"
+            fill="none" stroke="#79c0ff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
 
   <!--
-    Three provider badges — contained within x=14 … x=204 (190 px)
-    Badge width = 58 px, gap = 8 px  ·  3×58 + 2×8 = 190 px  ✓
+    Provider badges row  — y=152–176, total width=194px
+    AWS (60px) | gap 8 | AZURE (66px) | gap 8 | GCP (52px)  = 194px
+    Centred at x=120: start = 120 − 97 = 23
+    AWS:   x=23–83    centre=53
+    AZURE: x=91–157   centre=124
+    GCP:   x=165–217  centre=191
+    Max right edge = 217 < 228  ✓
   -->
 
-  <!-- AWS badge: x=14 … 72, centre=43 -->
-  <rect x="14" y="152" width="58" height="24" rx="5"
-        fill="#1a1e24" stroke="#ff9900" stroke-width="1.2"/>
-  <text x="43" y="168" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" font-weight="700" fill="#ff9900"
-        text-anchor="middle" letter-spacing="0.6">AWS</text>
+  <!-- AWS badge -->
+  <rect x="23" y="152" width="60" height="24" rx="5"
+        fill="#161b22" stroke="#ff9900" stroke-width="1.2"/>
+  <text x="53" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" font-weight="700" fill="#ff9900"
+        text-anchor="middle" letter-spacing="1">AWS</text>
 
-  <!-- Azure badge: x=80 … 138, centre=109 -->
-  <rect x="80" y="152" width="58" height="24" rx="5"
-        fill="#1a1e24" stroke="#0078d4" stroke-width="1.2"/>
-  <text x="109" y="168" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" font-weight="700" fill="#0078d4"
-        text-anchor="middle" letter-spacing="0.6">AZURE</text>
+  <!-- Azure badge -->
+  <rect x="91" y="152" width="66" height="24" rx="5"
+        fill="#161b22" stroke="#0078d4" stroke-width="1.2"/>
+  <text x="124" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" font-weight="700" fill="#0078d4"
+        text-anchor="middle" letter-spacing="0.8">AZURE</text>
 
-  <!-- GCP badge: x=146 … 204, centre=175 -->
-  <rect x="146" y="152" width="58" height="24" rx="5"
-        fill="#1a1e24" stroke="#34a853" stroke-width="1.2"/>
-  <text x="175" y="168" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" font-weight="700" fill="#34a853"
-        text-anchor="middle" letter-spacing="0.6">GCP</text>
+  <!-- GCP badge -->
+  <rect x="165" y="152" width="52" height="24" rx="5"
+        fill="#161b22" stroke="#34a853" stroke-width="1.2"/>
+  <text x="191" y="168.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" font-weight="700" fill="#34a853"
+        text-anchor="middle" letter-spacing="1">GCP</text>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       ZONE B  ·  CENTRE  ·  x 225 – 622
-       Title · separator · subtitle · stat pills
-       All elements centred at x=423
+       ZONE A / B DIVIDER  ·  x=240
+       ═══════════════════════════════════════════════════════════════════ -->
+  <line x1="240" y1="22" x2="240" y2="178"
+        stroke="#21262d" stroke-width="1" stroke-dasharray="4,4" opacity="0.7"/>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       ZONE B  ·  x 250 – 710  ·  centre x=480
+       Title / separator / subtitle / stat pills
+       All elements centred at x=480 and confined to x=258–702
        ═══════════════════════════════════════════════════════════════════ -->
 
-  <!-- Main title (font-size 28 → ~384 px wide, stays within 225–622) -->
-  <text x="423" y="84"
+  <!-- Main title — "MultiCloud Security Audit Tool" font-size=26 -->
+  <!-- ~30 chars × 13.5px/char ≈ 405px  →  480±202 = 278–682  ✓ -->
+  <text x="480" y="72"
         font-family="'Segoe UI',Roboto,'Helvetica Neue',sans-serif"
-        font-size="28" font-weight="700" fill="url(#titleGrad)"
-        text-anchor="middle" letter-spacing="-0.3">
-    MultiCloud Security Audit
+        font-size="26" font-weight="700" fill="url(#titleGrad)"
+        text-anchor="middle" letter-spacing="-0.5">
+    MultiCloud Security Audit Tool
   </text>
 
-  <!-- Tri-colour separator line (x=232 … x=614) -->
-  <rect x="232" y="96" width="382" height="2" rx="1" fill="url(#lineGrad)" opacity="0.75"/>
+  <!-- Tri-colour separator — x=290 to x=670 (380px) -->
+  <rect x="290" y="84" width="380" height="2" rx="1"
+        fill="url(#stripeGrad)" opacity="0.80"/>
 
-  <!-- Subtitle (font-size 12.5 → ~374 px wide, stays within 225–622) -->
-  <text x="423" y="122"
+  <!-- Subtitle — font-size=11.5 -->
+  <!-- ~57 chars × 5.8px ≈ 330px  →  480±165 = 315–645  ✓ -->
+  <text x="480" y="108"
         font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="12.5" font-weight="400" fill="#8b949e"
-        text-anchor="middle" letter-spacing="0.2">
-    Open-source Python security auditing for AWS · Azure · GCP
+        font-size="11.5" font-weight="400" fill="#8b949e"
+        text-anchor="middle" letter-spacing="0.3">
+    Open-source Python security auditing for AWS  ·  Azure  ·  GCP
   </text>
 
   <!--
-    Stat pills — three pills centred at x=423
-    Widths: CIS=128  Checks=96  Read-only=86   gaps=8
-    Total = 128+96+86 + 2×8 = 326 px
-    Start x = 423 − 163 = 260   End x = 260 + 326 = 586  ✓ (within 225–622)
+    Stat pills row  — y=130–154
+    Pill widths: CIS=140 | gap=10 | Checks=106 | gap=10 | Read-only=96
+    Total = 362px  →  start = 480 − 181 = 299   end = 661  ✓ (within 258–702)
   -->
 
-  <!-- Pill 1 — CIS Benchmark v3.0: x=260 … 388 -->
-  <rect x="260" y="148" width="128" height="24" rx="12"
+  <!-- Pill 1 — CIS AWS Foundations v3.0 -->
+  <rect x="299" y="130" width="140" height="24" rx="12"
         fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <circle cx="277" cy="160" r="5" fill="#ff9900" opacity="0.85"/>
-  <text x="290" y="164.5" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" fill="#8b949e">CIS Benchmark v3.0</text>
+  <circle cx="318" cy="142" r="4.5" fill="#ff9900" opacity="0.9"/>
+  <text x="332" y="146.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" fill="#8b949e" letter-spacing="0.1">
+    CIS Benchmark v3.0
+  </text>
 
-  <!-- Pill 2 — 140+ Checks: x=396 … 492 -->
-  <rect x="396" y="148" width="96" height="24" rx="12"
+  <!-- Pill 2 — 150+ Checks -->
+  <rect x="449" y="130" width="106" height="24" rx="12"
         fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <circle cx="413" cy="160" r="5" fill="#58a6ff" opacity="0.85"/>
-  <text x="426" y="164.5" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" fill="#8b949e">140+ Checks</text>
+  <circle cx="468" cy="142" r="4.5" fill="#58a6ff" opacity="0.9"/>
+  <text x="482" y="146.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" fill="#8b949e" letter-spacing="0.1">
+    150+ Checks
+  </text>
 
-  <!-- Pill 3 — Read-only: x=500 … 586 -->
-  <rect x="500" y="148" width="86" height="24" rx="12"
+  <!-- Pill 3 — Read-only -->
+  <rect x="565" y="130" width="96" height="24" rx="12"
         fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <circle cx="517" cy="160" r="5" fill="#34a853" opacity="0.85"/>
-  <text x="530" y="164.5" font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" fill="#8b949e">Read-only</text>
+  <circle cx="584" cy="142" r="4.5" fill="#34a853" opacity="0.9"/>
+  <text x="598" y="146.5" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" fill="#8b949e" letter-spacing="0.1">
+    Read-only
+  </text>
+
+  <!-- Version tag below pills — centred at x=480, y=170 -->
+  <text x="480" y="170"
+        font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="10" fill="#484f58" text-anchor="middle" letter-spacing="0.5">
+    v2.0.0  ·  Python 3.10+  ·  MIT License
+  </text>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       ZONE A/B divider  ·  x=220
+       ZONE B / C DIVIDER  ·  x=720
        ═══════════════════════════════════════════════════════════════════ -->
-  <line x1="220" y1="30" x2="220" y2="190"
-        stroke="#21262d" stroke-width="1" stroke-dasharray="4,4"/>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       ZONE B/C divider  ·  x=626
-       ═══════════════════════════════════════════════════════════════════ -->
-  <line x1="626" y1="30" x2="626" y2="190"
-        stroke="#21262d" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="720" y1="22" x2="720" y2="178"
+        stroke="#21262d" stroke-width="1" stroke-dasharray="4,4" opacity="0.7"/>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       ZONE C  ·  RIGHT  ·  x 627 – 900
-       Decorative cloud-circuit art · centred at x=762
+       ZONE C  ·  x 730 – 960  ·  centre x=840
+       Cloud-mesh diagram — four nodes + six edges
+       All art confined to x=748–932, y=28–148
+       (text block at y=158–176 has 10px clear above)
        ═══════════════════════════════════════════════════════════════════ -->
 
-  <!-- Cloud outline group — translate so art fits x=635…895 -->
-  <g transform="translate(698,28)" opacity="0.52">
-    <!-- Three overlapping cloud ellipses -->
-    <ellipse cx="64" cy="50" rx="46" ry="30" fill="none" stroke="#30363d" stroke-width="1.4"/>
-    <ellipse cx="40" cy="60" rx="30" ry="22" fill="none" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="88" cy="58" rx="28" ry="20" fill="none" stroke="#30363d" stroke-width="1"/>
+  <!--
+    Node positions (absolute, inside zone C):
+      Core  (840, 52) — blue       top-centre
+      AWS   (762, 108) — orange    bottom-left
+      Azure (840, 124) — blue-mid  bottom-centre
+      GCP   (918, 108) — green     bottom-right
 
-    <!-- Connector lines (dashed) -->
-    <line x1="24"  y1="72" x2="64"  y2="82" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="64"  y1="82" x2="100" y2="72" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="64"  y1="18" x2="64"  y2="32" stroke="#484f58" stroke-width="1" stroke-dasharray="3,3"/>
-    <line x1="24"  y1="72" x2="64"  y2="18" stroke="#484f58" stroke-width="0.7" stroke-dasharray="2,4" opacity="0.5"/>
-    <line x1="100" y1="72" x2="64"  y2="18" stroke="#484f58" stroke-width="0.7" stroke-dasharray="2,4" opacity="0.5"/>
+    Edge order: Core→AWS | Core→GCP | Core→Azure | AWS→Azure | Azure→GCP
+    Edges are drawn FIRST so nodes paint on top.
+  -->
 
-    <!-- Provider-coloured nodes -->
-    <circle cx="24"  cy="72" r="5" fill="#ff9900" opacity="0.90"/>   <!-- AWS -->
-    <circle cx="64"  cy="82" r="5" fill="#0078d4" opacity="0.90"/>   <!-- Azure -->
-    <circle cx="100" cy="72" r="5" fill="#34a853" opacity="0.90"/>   <!-- GCP -->
-    <circle cx="64"  cy="18" r="4" fill="#58a6ff" opacity="0.85"/>   <!-- Core -->
+  <!-- Edges (drawn below nodes) -->
+  <g stroke="#30363d" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75">
+    <!-- Core → AWS -->
+    <line x1="840" y1="52" x2="762" y2="108"/>
+    <!-- Core → GCP -->
+    <line x1="840" y1="52" x2="918" y2="108"/>
+    <!-- Core → Azure -->
+    <line x1="840" y1="52" x2="840" y2="124"/>
+    <!-- AWS → Azure -->
+    <line x1="762" y1="108" x2="840" y2="124"/>
+    <!-- Azure → GCP -->
+    <line x1="840" y1="124" x2="918" y2="108"/>
   </g>
 
-  <!-- Version / licence text in right zone -->
-  <text x="762" y="156"
-        font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" fill="#484f58"
-        text-anchor="middle" letter-spacing="0.3">
-    Python 3.10+
-  </text>
-  <text x="762" y="172"
-        font-family="'Segoe UI',Roboto,sans-serif"
-        font-size="10.5" fill="#484f58"
-        text-anchor="middle" letter-spacing="0.3">
-    MIT License
-  </text>
+  <!-- Node: Core (top-centre) — blue, r=10 -->
+  <circle cx="840" cy="52" r="10" fill="#1f6feb" opacity="0.20"/>
+  <circle cx="840" cy="52" r="10" fill="none" stroke="#58a6ff" stroke-width="1.6" opacity="0.90"/>
+  <circle cx="840" cy="52" r="3.5" fill="#79c0ff" opacity="0.95"/>
+
+  <!-- Node: AWS (bottom-left) — orange, r=8 -->
+  <circle cx="762" cy="108" r="8" fill="#b56200" opacity="0.20"/>
+  <circle cx="762" cy="108" r="8" fill="none" stroke="#ff9900" stroke-width="1.5" opacity="0.90"/>
+  <circle cx="762" cy="108" r="3" fill="#ff9900" opacity="0.95"/>
+
+  <!-- Node: Azure (bottom-centre) — blue-mid, r=8 -->
+  <circle cx="840" cy="124" r="8" fill="#004880" opacity="0.20"/>
+  <circle cx="840" cy="124" r="8" fill="none" stroke="#0078d4" stroke-width="1.5" opacity="0.90"/>
+  <circle cx="840" cy="124" r="3" fill="#0078d4" opacity="0.95"/>
+
+  <!-- Node: GCP (bottom-right) — green, r=8 -->
+  <circle cx="918" cy="108" r="8" fill="#1a6630" opacity="0.20"/>
+  <circle cx="918" cy="108" r="8" fill="none" stroke="#34a853" stroke-width="1.5" opacity="0.90"/>
+  <circle cx="918" cy="108" r="3" fill="#34a853" opacity="0.95"/>
+
+  <!-- Node labels (14px below each node, font-size=8.5) -->
+  <text x="840" y="36" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="8.5" fill="#58a6ff" text-anchor="middle" opacity="0.80">CORE</text>
+  <text x="748" y="124" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="8.5" fill="#ff9900" text-anchor="middle" opacity="0.80">AWS</text>
+  <text x="840" y="142" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="8.5" fill="#0078d4" text-anchor="middle" opacity="0.80">AZURE</text>
+  <text x="932" y="124" font-family="'Segoe UI',Roboto,sans-serif"
+        font-size="8.5" fill="#34a853" text-anchor="middle" opacity="0.80">GCP</text>
 
 
   <!-- ── Bottom accent stripe ───────────────────────────────────────── -->
-  <rect x="0" y="216" width="900" height="4" rx="0"
-        fill="url(#lineGrad)" clip-path="url(#roundClip)" opacity="0.65"/>
+  <rect x="0" y="196" width="960" height="4" rx="0"
+        fill="url(#stripeGrad)" clip-path="url(#clip)" opacity="0.70"/>
 
 </svg>

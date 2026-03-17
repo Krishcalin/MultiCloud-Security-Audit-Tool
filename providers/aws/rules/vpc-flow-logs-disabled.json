@@ -1,0 +1,17 @@
+{
+  "id": "VPC-01",
+  "name": "VPC flow logs not enabled",
+  "description": "No VPC Flow Logs are configured for one or more VPCs. Without flow logs, network traffic — including lateral movement, data exfiltration, and reconnaissance — cannot be audited or investigated post-incident.",
+  "severity": "MEDIUM",
+  "service": "vpc",
+  "path": "vpc.vpcs.*",
+  "conditions": ["FlowLogs", "empty"],
+  "remediation": "Enable VPC Flow Logs for all VPCs: aws ec2 create-flow-logs --resource-type VPC --resource-ids <vpc-id> --traffic-type ALL --log-destination-type cloud-watch-logs. Set retention to at least 90 days. Use Athena queries or Security Lake for analysis.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.9"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.2"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "EC2-04",
+  "name": "EC2 instance metadata service v1 (IMDSv1) enabled",
+  "description": "The Instance Metadata Service v1 (IMDSv1) does not require session tokens, making instances vulnerable to SSRF attacks that allow attackers to steal IAM credentials from the metadata service.",
+  "severity": "HIGH",
+  "service": "ec2",
+  "path": "ec2.instances.*",
+  "conditions": ["and",
+    ["State", "equal", "running"],
+    ["MetadataOptions.HttpTokens", "notEqual", "required"]
+  ],
+  "remediation": "Set HttpTokens=required via: aws ec2 modify-instance-metadata-options --instance-id <id> --http-tokens required --http-put-response-hop-limit 1. Apply IMDSv2 enforcement at launch via IAM policy condition 'ec2:MetadataHttpTokens'.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.6"},
+    {"name": "AWS Well-Architected", "pillar": "Security", "reference": "SEC 06"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html",
+    "https://aws.amazon.com/blogs/security/defense-in-depth-open-firewalls-reverse-proxies-ssrf-vulnerabilities-ec2-instance-metadata-service/"
+  ]
+}

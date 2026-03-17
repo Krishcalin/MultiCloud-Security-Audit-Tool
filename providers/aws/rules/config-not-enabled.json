@@ -1,0 +1,17 @@
+{
+  "id": "CFG-01",
+  "name": "AWS Config not enabled",
+  "description": "AWS Config is not enabled. Without Config, there is no continuous compliance evaluation, configuration change tracking, or drift detection — making it impossible to demonstrate compliance or investigate configuration-related incidents.",
+  "severity": "MEDIUM",
+  "service": "config",
+  "path": "config.enabled",
+  "conditions": [".", "false"],
+  "remediation": "Enable AWS Config in all regions with a recording group that covers all resource types. Set up a delivery channel to an encrypted S3 bucket with Object Lock. Enable managed Config rules for CIS controls. Consider AWS Control Tower for organisation-wide Config enablement.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "3.5"},
+    {"name": "SOC 2", "reference": "CC6.6"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/config/latest/developerguide/getting-started.html"
+  ]
+}

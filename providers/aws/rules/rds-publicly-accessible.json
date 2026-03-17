@@ -1,0 +1,17 @@
+{
+  "id": "RDS-01",
+  "name": "RDS instance publicly accessible",
+  "description": "The RDS database instance is configured with PubliclyAccessible=true, meaning the database endpoint is resolvable from the internet. Even with a security group, this dramatically increases the attack surface.",
+  "severity": "CRITICAL",
+  "service": "rds",
+  "path": "rds.instances.*",
+  "conditions": ["PubliclyAccessible", "true"],
+  "remediation": "Set PubliclyAccessible=false. Place RDS instances in private subnets. Use a bastion host, AWS PrivateLink, or RDS Proxy for access. Apply security groups restricting inbound to application subnet CIDRs only.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.3.3"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "1.3"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.html"
+  ]
+}
