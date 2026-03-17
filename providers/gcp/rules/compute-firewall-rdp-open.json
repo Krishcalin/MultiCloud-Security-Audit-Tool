@@ -1,0 +1,16 @@
+{
+  "id": "NET-02",
+  "name": "Firewall rule allows RDP (TCP/3389) from the internet",
+  "description": "A VPC firewall rule allows inbound TCP traffic on port 3389 (RDP) from 0.0.0.0/0 or ::/0. This exposes Windows VMs to brute-force attacks, BlueKeep-style RDP vulnerabilities, and remote ransomware deployment. Open RDP is consistently ranked as one of the top initial access methods in cloud incident response.",
+  "severity": "CRITICAL",
+  "service": "compute",
+  "path": "compute.firewalls.*",
+  "conditions": ["opensRDP", "true"],
+  "remediation": "Delete or restrict the firewall rule. Use IAP for RDP tunneling instead of exposing port 3389: gcloud compute start-iap-tunnel. If direct RDP is needed, restrict source IPs to specific CIDR ranges and enforce MFA via Cloud Identity.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "3.7"}
+  ],
+  "references": [
+    "https://cloud.google.com/iap/docs/using-tcp-forwarding"
+  ]
+}

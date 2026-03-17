@@ -1,0 +1,16 @@
+{
+  "id": "GCS-01",
+  "name": "Cloud Storage bucket is publicly accessible",
+  "description": "The bucket's IAM policy grants access to allUsers or allAuthenticatedUsers, making the bucket contents readable or writable by anyone on the internet. This is the leading cause of GCP data breaches involving Cloud Storage.",
+  "severity": "CRITICAL",
+  "service": "storage",
+  "path": "storage.buckets.*",
+  "conditions": ["allUsersAccess", "true"],
+  "remediation": "Remove allUsers and allAuthenticatedUsers from the bucket IAM policy. Enable Public Access Prevention (enforced) on the bucket: gcloud storage buckets update gs://BUCKET --public-access-prevention. Use Signed URLs for time-limited public access. Audit with: gcloud storage buckets list --format='value(name,iamConfiguration.publicAccessPrevention)'.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "5.1"}
+  ],
+  "references": [
+    "https://cloud.google.com/storage/docs/public-access-prevention"
+  ]
+}

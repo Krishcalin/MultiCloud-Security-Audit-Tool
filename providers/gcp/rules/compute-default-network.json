@@ -1,0 +1,16 @@
+{
+  "id": "NET-03",
+  "name": "Default VPC network exists in project",
+  "description": "The default VPC network still exists in the project. The default network comes with pre-configured permissive firewall rules (allow-internal, allow-ssh, allow-rdp, allow-icmp from 0.0.0.0/0) that are often left in place. Resources created without an explicit network are placed in the default VPC, inheriting these open rules.",
+  "severity": "MEDIUM",
+  "service": "compute",
+  "path": "compute.networks.*",
+  "conditions": ["isDefault", "true"],
+  "remediation": "Delete the default network: gcloud compute networks delete default. Create custom-mode VPC networks with explicit subnets and firewall rules sized to actual requirements. Ensure all new projects have an Organization Policy to skip default network creation (constraints/compute.skipDefaultNetworkCreation).",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "3.1"}
+  ],
+  "references": [
+    "https://cloud.google.com/vpc/docs/vpc#default-network"
+  ]
+}

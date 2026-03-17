@@ -1,0 +1,16 @@
+{
+  "id": "IAM-02",
+  "name": "Service account has admin or owner role",
+  "description": "A service account is bound to a highly privileged role (roles/owner, roles/editor, roles/iam.securityAdmin, or similar) at the project level. If the service account key is compromised or misused, an attacker gains full administrative access to the project.",
+  "severity": "CRITICAL",
+  "service": "iam",
+  "path": "iam.service_accounts.*",
+  "conditions": ["hasAdminRole", "true"],
+  "remediation": "Remove admin roles from service accounts. Grant only the predefined roles required for the specific workload. Use separate service accounts for separate purposes. Prefer Workload Identity over service account keys for GKE workloads.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "1.5"}
+  ],
+  "references": [
+    "https://cloud.google.com/iam/docs/best-practices-service-accounts"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "INST-03",
+  "name": "VM instance uses default service account with full cloud-platform API scope",
+  "description": "The VM instance is running as the default Compute Engine service account (-compute@developer.gserviceaccount.com) with the cloud-platform access scope, which grants access to all Google Cloud APIs. The default service account is automatically granted the Editor role, meaning the VM can modify any resource in the project.",
+  "severity": "HIGH",
+  "service": "compute",
+  "path": "compute.instances.*",
+  "conditions": ["defaultSaFullApiAccess", "true"],
+  "remediation": "Create a dedicated service account with only the roles required by the workload and attach it to the instance. Alternatively, keep the default service account but change the access scope from cloud-platform to specific API scopes. Never use the default Compute SA for production workloads.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "4.3"}
+  ],
+  "references": [
+    "https://cloud.google.com/compute/docs/access/service-accounts#default_service_account"
+  ]
+}

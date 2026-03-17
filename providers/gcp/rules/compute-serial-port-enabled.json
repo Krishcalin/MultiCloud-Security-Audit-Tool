@@ -1,0 +1,16 @@
+{
+  "id": "INST-02",
+  "name": "Serial port access enabled on VM instance",
+  "description": "The VM instance has serial port access enabled via instance metadata (serial-port-enable=true). The serial console provides unauthenticated interactive access to the VM and does not support OS Login — anyone with the compute.instances.getSerialPortOutput permission can interact with the console. This is a known privilege escalation vector.",
+  "severity": "MEDIUM",
+  "service": "compute",
+  "path": "compute.instances.*",
+  "conditions": ["serialPortEnabled", "true"],
+  "remediation": "Disable serial port access on all instances: gcloud compute instances add-metadata INSTANCE --metadata serial-port-enable=false. Enforce at scale via Organization Policy constraint constraints/compute.disableSerialPortAccess. Use Cloud Logging serial output instead for debugging.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "4.5"}
+  ],
+  "references": [
+    "https://cloud.google.com/compute/docs/instances/interacting-with-serial-console"
+  ]
+}

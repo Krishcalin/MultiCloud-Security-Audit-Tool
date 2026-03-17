@@ -20,7 +20,7 @@ Usage
 Phase 1 delivers the core engine, base classes, and the ``demo`` subcommand.
 Phase 2 adds the AWS live provider (CIS AWS Foundations v3.0).
 Phase 3 adds the Azure live provider (CIS Azure Foundations v2.0).
-Phase 4 (GCP) is coming soon.
+Phase 4 adds the GCP live provider (CIS GCP Foundations v2.0).
 """
 
 from __future__ import annotations
@@ -428,7 +428,7 @@ Examples:
     az_p.add_argument("-v", "--verbose",   action="store_true")
 
     # ---- gcp (Phase 4) ----
-    gcp_p = sub.add_parser("gcp", help="Audit a GCP project (Phase 4 — coming soon)")
+    gcp_p = sub.add_parser("gcp", help="Audit a GCP project (CIS GCP Foundations v2.0)")
     gcp_p.add_argument("--project",              metavar="PROJECT_ID")
     gcp_p.add_argument("--service-account-file", metavar="FILE")
     gcp_p.add_argument("--html",                 metavar="FILE")
@@ -708,13 +708,105 @@ def _run_azure(args: argparse.Namespace) -> int:
     return 1 if any(f.severity in ("CRITICAL", "HIGH") for f in findings) else 0
 
 
-def _run_coming_soon(provider: str) -> int:
-    phase_map = {"gcp": 4}
-    phase = phase_map.get(provider, "?")
+def _run_gcp(args: argparse.Namespace) -> int:
+    """Live GCP project audit — Phase 4."""
+    from core.ruleset import Ruleset
+    from core.engine import ProcessingEngine
+    from output.encoder import save_json
+    from output.report import save_html
+
+    project_id = args.project
+    if not project_id:
+        print("[!] --project is required for the gcp provider.")
+        return 2
+
     print(f"[*] MultiCloud Security Audit Tool v{__version__}")
-    print(f"[!] Provider '{provider.upper()}' is implemented in Phase {phase}.")
-    print(f"    Run 'python scout.py demo' to see the engine and report in action.")
-    return 0
+    print(f"[*] Provider : GCP")
+    print(f"[*] Project  : {project_id}")
+    if args.service_account_file:
+        print(f"[*] SA File  : {args.service_account_file}")
+    print()
+
+    # --- Import provider (requires google-auth + google-api-python-client) ---
+    try:
+        from providers.gcp import GCPProvider
+    except ImportError as exc:
+        print(f"[!] GCP SDK not installed: {exc}")
+        print("    Run: pip install google-auth google-api-python-client "
+              "google-auth-httplib2 google-cloud-storage")
+        return 2
+
+    # --- Load ruleset ---
+    _rules_dir = Path(__file__).parent / "providers" / "gcp" / "rules"
+    ruleset_path = _rules_dir / "gcp-cis-2.0-ruleset.json"
+    if not ruleset_path.exists():
+        print(f"[!] Ruleset not found: {ruleset_path}")
+        return 2
+
+    try:
+        ruleset = Ruleset(ruleset_path, rule_dirs=[str(_rules_dir)])
+    except Exception as exc:
+        print(f"[!] Failed to load ruleset: {exc}")
+        return 2
+
+    print(f"[*] Ruleset  : {ruleset_path.name} ({len(ruleset)} rules)")
+    print()
+
+    # --- Fetch data ---
+    provider = GCPProvider(
+        project_id=project_id,
+        service_account_file=args.service_account_file,
+        verbose=args.verbose,
+    )
+    print("[*] Connecting to GCP …")
+    try:
+        provider.fetch_sync()
+    except Exception as exc:
+        print(f"[!] GCP fetch failed: {exc}")
+        return 2
+
+    project_name = provider.account_name or project_id
+    print(f"[*] Project  : {project_name}")
+    print()
+
+    # --- Run engine ---
+    engine = ProcessingEngine(ruleset)
+    findings = engine.run(provider.get_data(), provider="gcp")
+
+    # --- Console summary ---
+    from collections import Counter
+    sev_c = Counter(f.severity for f in findings)
+    print(f"  Findings : {len(findings)}")
+    for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]:
+        count = sev_c.get(sev, 0)
+        if count:
+            print(f"  {sev:<10}: {count}")
+    print()
+
+    meta = {
+        "scan_date": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "account":   project_name,
+        "project":   project_id,
+        "version":   __version__,
+    }
+
+    # --- Save outputs ---
+    if args.json:
+        save_json(findings, args.json)
+        print(f"[+] JSON report saved to: {args.json}")
+
+    safe_proj = project_id.replace("-", "_")[:20]
+    html_path = args.html or f"gcp_{safe_proj}_report.html"
+    save_html(findings, html_path, meta=meta)
+    print(f"[+] HTML report saved to: {html_path}")
+
+    import webbrowser
+    try:
+        webbrowser.open(str(Path(html_path).resolve().as_uri()))
+    except Exception:
+        pass
+
+    return 1 if any(f.severity in ("CRITICAL", "HIGH") for f in findings) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -732,7 +824,7 @@ def main() -> int:
     elif args.provider == "azure":
         return _run_azure(args)
     elif args.provider == "gcp":
-        return _run_coming_soon(args.provider)
+        return _run_gcp(args)
     else:
         parser.print_help()
         return 1

@@ -1,0 +1,17 @@
+{
+  "id": "SQL-03",
+  "name": "Cloud SQL instance automated backups not enabled",
+  "description": "Automated backups are disabled for the Cloud SQL instance. Without backups, the database cannot be restored after data corruption, accidental deletion, ransomware, or infrastructure failure. This violates data availability requirements in most compliance frameworks.",
+  "severity": "MEDIUM",
+  "service": "sql",
+  "path": "sql.instances.*",
+  "conditions": ["backupEnabled", "false"],
+  "remediation": "Enable automated backups: Cloud Console → SQL → Edit → Backups → Enable automated backups. Configure the backup window, retention count (minimum 7 days), and Point-in-Time Recovery (PITR). Test restores periodically to verify backup integrity.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "6.7"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "12.3.4"}
+  ],
+  "references": [
+    "https://cloud.google.com/sql/docs/mysql/backup-recovery/backing-up"
+  ]
+}

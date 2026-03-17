@@ -1,0 +1,16 @@
+{
+  "id": "INST-04",
+  "name": "VM instance has a public IP address assigned",
+  "description": "The VM instance has a public (external) IP address assigned. Public IPs expose the VM to direct internet access and increase the attack surface. Combine with an open firewall rule and the instance becomes trivially reachable from the internet.",
+  "severity": "LOW",
+  "service": "compute",
+  "path": "compute.instances.*",
+  "conditions": ["hasPublicIP", "true"],
+  "remediation": "Remove the external IP and route internet traffic through Cloud NAT for outbound-only access. Use a load balancer or Cloud Armor as the internet entry point. If direct SSH/RDP access is needed, use IAP tunneling instead of a public IP.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "4.9"}
+  ],
+  "references": [
+    "https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address"
+  ]
+}

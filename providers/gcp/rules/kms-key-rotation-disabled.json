@@ -1,0 +1,16 @@
+{
+  "id": "KMS-01",
+  "name": "Cloud KMS key does not have automatic rotation enabled",
+  "description": "A Cloud KMS symmetric encryption key does not have an automatic rotation period configured. Without rotation, a compromised key material remains valid indefinitely. Regular key rotation limits the amount of data encrypted with a single key version and reduces the impact of key compromise.",
+  "severity": "MEDIUM",
+  "service": "kms",
+  "path": "kms.keys.*",
+  "conditions": ["rotationEnabled", "false"],
+  "remediation": "Enable automatic rotation on the key: Cloud Console → KMS → Key ring → Key → Edit → Rotation period → Set to 90 days (recommended). Or via CLI: gcloud kms keys update KEY --keyring=KEYRING --location=LOCATION --next-rotation-time=DATE --rotation-period=90d. For asymmetric keys, rotation must be performed manually by creating a new key version.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "1.10"}
+  ],
+  "references": [
+    "https://cloud.google.com/kms/docs/key-rotation"
+  ]
+}

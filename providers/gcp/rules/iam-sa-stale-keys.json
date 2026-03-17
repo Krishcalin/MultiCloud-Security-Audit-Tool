@@ -1,0 +1,16 @@
+{
+  "id": "IAM-03",
+  "name": "Service account has user-managed key older than 90 days",
+  "description": "A service account has a user-managed key that was created more than 90 days ago. Long-lived credentials increase the window of opportunity for compromise. User-managed keys are high-risk because they can be downloaded and do not rotate automatically.",
+  "severity": "MEDIUM",
+  "service": "iam",
+  "path": "iam.service_accounts.*",
+  "conditions": ["staleKeys", "true"],
+  "remediation": "Rotate service account keys every 90 days or less. Better yet, eliminate user-managed keys entirely: use Workload Identity for GKE, Attached Service Accounts for VMs, and impersonation for local development. Delete keys that are no longer in use.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "1.7"}
+  ],
+  "references": [
+    "https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys"
+  ]
+}

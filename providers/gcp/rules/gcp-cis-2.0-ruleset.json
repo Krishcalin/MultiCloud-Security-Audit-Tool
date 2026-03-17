@@ -1,0 +1,25 @@
+{
+  "about": "CIS Google Cloud Platform Foundation Benchmark v2.0 — MultiCloud Security Audit Tool",
+  "rules": {
+    "iam-primitive-roles.json":          [{"enabled": true, "level": "danger"}],
+    "iam-sa-admin-role.json":            [{"enabled": true, "level": "danger"}],
+    "iam-sa-stale-keys.json":            [{"enabled": true, "level": "warning"}],
+    "storage-public-access.json":        [{"enabled": true, "level": "danger"}],
+    "storage-uniform-access-disabled.json": [{"enabled": true, "level": "warning"}],
+    "storage-versioning-disabled.json":  [{"enabled": true, "level": "warning"}],
+    "storage-logging-disabled.json":     [{"enabled": true, "level": "warning"}],
+    "compute-firewall-ssh-open.json":    [{"enabled": true, "level": "danger"}],
+    "compute-firewall-rdp-open.json":    [{"enabled": true, "level": "danger"}],
+    "compute-default-network.json":      [{"enabled": true, "level": "warning"}],
+    "compute-oslogin-disabled.json":     [{"enabled": true, "level": "warning"}],
+    "compute-serial-port-enabled.json":  [{"enabled": true, "level": "warning"}],
+    "compute-sa-full-api-access.json":   [{"enabled": true, "level": "danger"}],
+    "compute-vm-public-ip.json":         [{"enabled": true, "level": "warning"}],
+    "sql-public-ip.json":                [{"enabled": true, "level": "danger"}],
+    "sql-ssl-not-required.json":         [{"enabled": true, "level": "danger"}],
+    "sql-backup-disabled.json":          [{"enabled": true, "level": "warning"}],
+    "logging-audit-logs-disabled.json":  [{"enabled": true, "level": "danger"}],
+    "logging-no-sink.json":              [{"enabled": true, "level": "warning"}],
+    "kms-key-rotation-disabled.json":    [{"enabled": true, "level": "warning"}]
+  }
+}

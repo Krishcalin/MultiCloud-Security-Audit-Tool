@@ -1,0 +1,16 @@
+{
+  "id": "GCS-03",
+  "name": "Cloud Storage bucket versioning not enabled",
+  "description": "Object versioning is disabled on the bucket. Without versioning, deleted or overwritten objects cannot be recovered. This increases the risk of accidental data loss and makes it impossible to audit historical object contents.",
+  "severity": "LOW",
+  "service": "storage",
+  "path": "storage.buckets.*",
+  "conditions": ["versioningEnabled", "false"],
+  "remediation": "Enable versioning: gcloud storage buckets update gs://BUCKET --versioning. Configure an Object Lifecycle rule to automatically delete old versions after a retention period (e.g., 90 days) to control storage costs.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "5.3"}
+  ],
+  "references": [
+    "https://cloud.google.com/storage/docs/object-versioning"
+  ]
+}

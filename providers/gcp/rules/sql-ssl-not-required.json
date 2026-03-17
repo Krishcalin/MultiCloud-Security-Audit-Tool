@@ -1,0 +1,17 @@
+{
+  "id": "SQL-02",
+  "name": "Cloud SQL instance does not require SSL/TLS connections",
+  "description": "The Cloud SQL instance does not enforce SSL/TLS for client connections. Without mandatory SSL, credentials and query data are transmitted in plaintext, vulnerable to network interception. This affects MySQL, PostgreSQL, and SQL Server instances.",
+  "severity": "HIGH",
+  "service": "sql",
+  "path": "sql.instances.*",
+  "conditions": ["requireSSL", "false"],
+  "remediation": "Enforce SSL by setting sslMode to ENCRYPTED_ONLY in the instance IP configuration, or enable the requireSsl flag: Cloud Console → SQL → Connections → SSL → Allow only SSL connections. Download and configure SSL certificates for all clients. For PostgreSQL, also set ssl=on in pg_hba.conf.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "6.4"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "4.2.1"}
+  ],
+  "references": [
+    "https://cloud.google.com/sql/docs/mysql/configure-ssl-instance"
+  ]
+}

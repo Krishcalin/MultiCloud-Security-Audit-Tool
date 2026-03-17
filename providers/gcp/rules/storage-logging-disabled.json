@@ -1,0 +1,16 @@
+{
+  "id": "GCS-04",
+  "name": "Cloud Storage bucket access logging not enabled",
+  "description": "Access logging is not configured for the bucket. Without access logs, there is no record of who accessed or modified objects, making incident investigation and compliance auditing impossible.",
+  "severity": "MEDIUM",
+  "service": "storage",
+  "path": "storage.buckets.*",
+  "conditions": ["loggingEnabled", "false"],
+  "remediation": "Enable access logging by setting a log bucket: gcloud storage buckets update gs://BUCKET --log-bucket=LOG_BUCKET --log-object-prefix=PREFIX. Ensure the log bucket is in the same region. Configure a lifecycle rule on the log bucket to control retention.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "5.4"}
+  ],
+  "references": [
+    "https://cloud.google.com/storage/docs/access-logs"
+  ]
+}

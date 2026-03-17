@@ -1,0 +1,16 @@
+{
+  "id": "NET-01",
+  "name": "Firewall rule allows SSH (TCP/22) from the internet",
+  "description": "A VPC firewall rule allows inbound TCP traffic on port 22 (SSH) from 0.0.0.0/0 or ::/0. This exposes every VM in the target network or tags to brute-force, credential stuffing, and exploitation of SSH vulnerabilities. Unrestricted SSH access is one of the most common initial access vectors in GCP environments.",
+  "severity": "CRITICAL",
+  "service": "compute",
+  "path": "compute.firewalls.*",
+  "conditions": ["opensSSH", "true"],
+  "remediation": "Delete or restrict the firewall rule to known management CIDRs. Use Identity-Aware Proxy (IAP) for OS Login to tunnel SSH without a public firewall rule: gcloud compute ssh --tunnel-through-iap. If SSH must be exposed, use Cloud Armor and restrict source IPs to your NAT gateway.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "3.6"}
+  ],
+  "references": [
+    "https://cloud.google.com/iap/docs/using-tcp-forwarding"
+  ]
+}

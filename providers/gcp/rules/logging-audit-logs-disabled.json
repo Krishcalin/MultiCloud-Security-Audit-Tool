@@ -1,0 +1,16 @@
+{
+  "id": "LOG-01",
+  "name": "Cloud Audit Logging not fully enabled for all services",
+  "description": "The project does not have Cloud Audit Logging configured to capture DATA_READ, DATA_WRITE, and ADMIN_READ log types for all services. Without full audit logging, data access events are not recorded, making it impossible to investigate data breaches, detect insider threats, or satisfy compliance audit requirements.",
+  "severity": "HIGH",
+  "service": "logging",
+  "path": "logging.audit_configs_enabled",
+  "conditions": [".", "false"],
+  "remediation": "Enable all audit log types for allServices in the project IAM policy: gcloud projects set-iam-policy PROJECT policy.yaml — where policy.yaml includes auditConfigs for allServices with DATA_READ, DATA_WRITE, and ADMIN_READ. Note: DATA_READ logging can generate high log volume; configure log exclusions to control costs.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "2.1"}
+  ],
+  "references": [
+    "https://cloud.google.com/logging/docs/audit/configure-data-access"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "INST-01",
+  "name": "OS Login not enabled on VM instance",
+  "description": "OS Login is not enabled on the VM instance. OS Login ties SSH access to Google accounts and enforces IAM-based authorization for SSH, removing the need to manage SSH keys manually. Without OS Login, SSH keys are managed per-instance via metadata, making it harder to revoke access promptly and audit who has shell access.",
+  "severity": "MEDIUM",
+  "service": "compute",
+  "path": "compute.instances.*",
+  "conditions": ["osLoginEnabled", "false"],
+  "remediation": "Enable OS Login at the project level (recommended) by setting the metadata key enable-oslogin=TRUE on the project: gcloud compute project-info add-metadata --metadata enable-oslogin=TRUE. Grant roles/compute.osLogin or roles/compute.osAdminLogin to users instead of managing SSH keys.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "4.4"}
+  ],
+  "references": [
+    "https://cloud.google.com/compute/docs/oslogin"
+  ]
+}

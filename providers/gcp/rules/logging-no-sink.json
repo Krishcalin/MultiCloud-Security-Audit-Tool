@@ -1,0 +1,16 @@
+{
+  "id": "LOG-02",
+  "name": "No Cloud Logging log sink configured",
+  "description": "No log sink is configured for the project. Without a log sink, audit logs and system logs are only retained in Cloud Logging for the default retention period (30–400 days depending on log type) and cannot be exported to long-term storage, SIEM systems, or compliance archives. Log sinks are required for incident response, forensic investigation, and long-term audit retention.",
+  "severity": "MEDIUM",
+  "service": "logging",
+  "path": "logging.has_log_sink",
+  "conditions": [".", "false"],
+  "remediation": "Create at least one log sink exporting to Cloud Storage (for long-term retention), BigQuery (for analysis), or Pub/Sub (for SIEM integration): gcloud logging sinks create SINK_NAME DESTINATION --log-filter=''. Ensure the sink's service account has write access to the destination. Consider an aggregated sink at the Organization level for centralised log management.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "2.2"}
+  ],
+  "references": [
+    "https://cloud.google.com/logging/docs/export/configure_export_v2"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "IAM-01",
+  "name": "Primitive roles (Owner/Editor) assigned at project level",
+  "description": "The project IAM policy grants the primitive role roles/owner or roles/editor to one or more members. Primitive roles are overly broad — Owner grants all permissions on all resources; Editor grants all write permissions. These roles violate the principle of least privilege and should be replaced with predefined or custom roles.",
+  "severity": "HIGH",
+  "service": "iam",
+  "path": "iam.project_iam",
+  "conditions": ["hasPrimitiveOwnerEditor", "true"],
+  "remediation": "Replace roles/owner and roles/editor with predefined roles scoped to the minimum permissions required. Use IAM Recommender to right-size existing bindings. Grant roles at the resource level rather than the project level where possible.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "1.4"}
+  ],
+  "references": [
+    "https://cloud.google.com/iam/docs/understanding-roles#basic"
+  ]
+}

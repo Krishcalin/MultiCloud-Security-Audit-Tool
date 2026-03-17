@@ -1,0 +1,16 @@
+{
+  "id": "GCS-02",
+  "name": "Cloud Storage bucket uniform access (bucket-level IAM) not enabled",
+  "description": "Uniform bucket-level access is not enabled. Without it, both IAM policies and legacy object ACLs control access, making it harder to audit and reason about effective permissions. Object ACLs can inadvertently expose objects that are restricted at the bucket IAM level.",
+  "severity": "MEDIUM",
+  "service": "storage",
+  "path": "storage.buckets.*",
+  "conditions": ["uniformBucketAccess", "false"],
+  "remediation": "Enable uniform bucket-level access: gcloud storage buckets update gs://BUCKET --uniform-bucket-level-access. Once enabled, object-level ACLs are disabled and bucket IAM becomes the sole access control mechanism. This simplifies auditing and prevents ACL-based bypasses.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "5.2"}
+  ],
+  "references": [
+    "https://cloud.google.com/storage/docs/uniform-bucket-level-access"
+  ]
+}
