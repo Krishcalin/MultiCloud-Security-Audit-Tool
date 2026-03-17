@@ -1,21 +1,26 @@
 # MultiCloud Security Audit Tool — GitHub Actions CI/CD Integration
 # Runs scheduled cloud security scans and uploads results to GitHub Code Scanning.
 #
-# Required secrets (set in Settings → Secrets → Actions):
-#   AWS:   AWS_ROLE_ARN (OIDC) or AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY
+# Required secrets (Settings → Secrets → Actions):
+#   AWS:   AWS_ROLE_ARN  (OIDC preferred)
+#          or AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY  (static keys fallback)
 #   Azure: AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
-#   GCP:   GCP_PROJECT_ID, GCP_SERVICE_ACCOUNT_KEY (base64-encoded JSON key)
+#   GCP:   GCP_PROJECT_ID, GCP_SERVICE_ACCOUNT_KEY  (base64-encoded service account JSON)
+#
+# Note: GitHub Code Scanning (upload-sarif) requires GitHub Advanced Security on
+#       private repositories. For public repos it is available at no extra cost.
 
 name: MultiCloud Security Scan
 
 on:
   schedule:
-    - cron: "0 6 * * 1"   # Every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"    # Every Monday at 06:00 UTC
   push:
     branches: [main]
     paths:
       - "providers/**"
       - "core/**"
+      - "output/**"
       - "scout.py"
   pull_request:
     branches: [main]
@@ -27,17 +32,22 @@ on:
         default: "all"
 
 jobs:
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   # AWS Security Scan
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   scan-aws:
     name: AWS Security Scan
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.provider == 'aws' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    if: >
+      github.event.inputs.provider == 'aws' ||
+      github.event.inputs.provider == 'all' ||
+      github.event_name != 'workflow_dispatch'
     permissions:
       contents: read
-      security-events: write   # required for upload-sarif
-      id-token: write           # required for OIDC auth
+      security-events: write   # GitHub Code Scanning (upload-sarif)
+      id-token: write          # OIDC authentication
+      checks: write            # publish-unit-test-result-action
+      pull-requests: write     # publish-unit-test-result-action PR annotations
 
     steps:
       - name: Checkout repository
@@ -50,14 +60,14 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install boto3
+        run: pip install boto3 pyyaml
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-west-1
-        continue-on-error: true
+        continue-on-error: true   # Skip gracefully if secret not configured
 
       - name: Run AWS security scan
         run: |
@@ -67,13 +77,27 @@ jobs:
             --json aws-findings.json \
             --sarif aws-results.sarif \
             --junit aws-junit.xml \
-            --exceptions exceptions.yaml || true
+            --exceptions exceptions.yaml.template \
+            --verbose || true
         env:
           AWS_DEFAULT_REGION: eu-west-1
+
+      - name: Ensure output files exist
+        if: always()
+        run: |
+          [ -f aws-results.sarif ] || \
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"MultiCloud Security Audit Tool","rules":[]}},"results":[]}]}' \
+            > aws-results.sarif
+          [ -f aws-junit.xml ] || \
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites name="MultiCloud Security Audit Tool" tests="0" failures="0" errors="0"/>' \
+            > aws-junit.xml
+          [ -f aws-report.html ]    || echo '<html><body><p>AWS scan did not produce a report. Check credentials.</p></body></html>' > aws-report.html
+          [ -f aws-findings.json ]  || echo '[]' > aws-findings.json
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true   # Requires GitHub Advanced Security on private repos
         with:
           sarif_file: aws-results.sarif
           category: aws-security
@@ -81,6 +105,7 @@ jobs:
       - name: Upload HTML report artifact
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: aws-security-report
           path: |
@@ -91,21 +116,28 @@ jobs:
       - name: Publish JUnit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: aws-junit.xml
           check_name: "AWS Security Findings"
+          comment_mode: off
 
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   # Azure Security Scan
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   scan-azure:
     name: Azure Security Scan
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.provider == 'azure' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    if: >
+      github.event.inputs.provider == 'azure' ||
+      github.event.inputs.provider == 'all' ||
+      github.event_name != 'workflow_dispatch'
     permissions:
       contents: read
       security-events: write
       id-token: write
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -119,7 +151,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install azure-identity azure-mgmt-compute azure-mgmt-storage \
+          pip install pyyaml \
+            azure-identity azure-mgmt-compute azure-mgmt-storage \
             azure-mgmt-network azure-mgmt-resource azure-mgmt-authorization \
             azure-mgmt-keyvault azure-mgmt-monitor azure-mgmt-security \
             azure-mgmt-sql azure-mgmt-containerservice azure-mgmt-containerregistry \
@@ -136,11 +169,25 @@ jobs:
             --json azure-findings.json \
             --sarif azure-results.sarif \
             --junit azure-junit.xml \
-            --exceptions exceptions.yaml || true
+            --exceptions exceptions.yaml.template \
+            --verbose || true
+
+      - name: Ensure output files exist
+        if: always()
+        run: |
+          [ -f azure-results.sarif ] || \
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"MultiCloud Security Audit Tool","rules":[]}},"results":[]}]}' \
+            > azure-results.sarif
+          [ -f azure-junit.xml ] || \
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites name="MultiCloud Security Audit Tool" tests="0" failures="0" errors="0"/>' \
+            > azure-junit.xml
+          [ -f azure-report.html ]   || echo '<html><body><p>Azure scan did not produce a report. Check credentials.</p></body></html>' > azure-report.html
+          [ -f azure-findings.json ] || echo '[]' > azure-findings.json
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: azure-results.sarif
           category: azure-security
@@ -148,6 +195,7 @@ jobs:
       - name: Upload HTML report artifact
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: azure-security-report
           path: |
@@ -158,21 +206,28 @@ jobs:
       - name: Publish JUnit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: azure-junit.xml
           check_name: "Azure Security Findings"
+          comment_mode: off
 
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   # GCP Security Scan
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   scan-gcp:
     name: GCP Security Scan
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.provider == 'gcp' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    if: >
+      github.event.inputs.provider == 'gcp' ||
+      github.event.inputs.provider == 'all' ||
+      github.event_name != 'workflow_dispatch'
     permissions:
       contents: read
       security-events: write
       id-token: write
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -186,13 +241,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install google-auth google-api-python-client \
+          pip install pyyaml \
+            google-auth google-api-python-client \
             google-auth-httplib2 google-cloud-storage
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        continue-on-error: true   # Skip gracefully if secret not configured
 
       - name: Run GCP security scan
         run: |
@@ -202,11 +259,25 @@ jobs:
             --json gcp-findings.json \
             --sarif gcp-results.sarif \
             --junit gcp-junit.xml \
-            --exceptions exceptions.yaml || true
+            --exceptions exceptions.yaml.template \
+            --verbose || true
+
+      - name: Ensure output files exist
+        if: always()
+        run: |
+          [ -f gcp-results.sarif ] || \
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"MultiCloud Security Audit Tool","rules":[]}},"results":[]}]}' \
+            > gcp-results.sarif
+          [ -f gcp-junit.xml ] || \
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuites name="MultiCloud Security Audit Tool" tests="0" failures="0" errors="0"/>' \
+            > gcp-junit.xml
+          [ -f gcp-report.html ]   || echo '<html><body><p>GCP scan did not produce a report. Check credentials.</p></body></html>' > gcp-report.html
+          [ -f gcp-findings.json ] || echo '[]' > gcp-findings.json
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: gcp-results.sarif
           category: gcp-security
@@ -214,6 +285,7 @@ jobs:
       - name: Upload HTML report artifact
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: gcp-security-report
           path: |
@@ -224,39 +296,50 @@ jobs:
       - name: Publish JUnit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: gcp-junit.xml
           check_name: "GCP Security Findings"
+          comment_mode: off
 
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   # Summary comment on PR
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   scan-summary:
     name: Post PR Summary
     runs-on: ubuntu-latest
     needs: [scan-aws, scan-azure, scan-gcp]
-    if: github.event_name == 'pull_request' && always()
+    if: always() && github.event_name == 'pull_request'
     permissions:
       pull-requests: write
+      contents: read
 
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        continue-on-error: true   # Artifacts may not exist if scan jobs were skipped
 
       - name: Post summary comment
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            let body = '## 🔒 MultiCloud Security Scan Summary\n\n';
-            body += '| Provider | Report |\n|---|---|\n';
-            body += '| AWS | See artifacts: `aws-security-report` |\n';
-            body += '| Azure | See artifacts: `azure-security-report` |\n';
-            body += '| GCP | See artifacts: `gcp-security-report` |\n\n';
-            body += '_Full reports available in the Actions run artifacts._';
-            github.rest.issues.createComment({
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+            });
+
+            let body = '## \uD83D\uDD12 MultiCloud Security Scan Summary\n\n';
+            body += '| Provider | Status | Artifacts |\n|---|---|---|\n';
+            body += '| AWS   | See checks tab | `aws-security-report` |\n';
+            body += '| Azure | See checks tab | `azure-security-report` |\n';
+            body += '| GCP   | See checks tab | `gcp-security-report` |\n\n';
+            body += '_Full HTML reports and JSON findings are available in the **Actions run artifacts** tab._\n';
+            body += '_SARIF results are uploaded to the **Security → Code Scanning** tab (requires GitHub Advanced Security)._';
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: body
+              body: body,
             });
