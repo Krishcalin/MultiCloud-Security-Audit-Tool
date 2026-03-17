@@ -25,6 +25,9 @@ from .services.compute  import fetch_compute
 from .services.sql      import fetch_sql
 from .services.logging  import fetch_logging
 from .services.kms      import fetch_kms
+from .services.gke        import fetch_gke
+from .services.bigquery   import fetch_bigquery
+from .services.functions  import fetch_functions
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +38,9 @@ _SERVICE_FETCHERS = {
     "sql":     fetch_sql,
     "logging": fetch_logging,
     "kms":     fetch_kms,
+    "gke":       fetch_gke,
+    "bigquery":  fetch_bigquery,
+    "functions": fetch_functions,
 }
 
 PROVIDER = "gcp"

@@ -24,6 +24,15 @@
     "security-no-contact.json":               [{"enabled": true, "level": "warning"}],
     "appservice-https-only.json":             [{"enabled": true, "level": "danger"}],
     "appservice-ftp-enabled.json":            [{"enabled": true, "level": "warning"}],
-    "appservice-auth-disabled.json":          [{"enabled": true, "level": "warning"}]
+    "appservice-auth-disabled.json":          [{"enabled": true, "level": "warning"}],
+    "aks-rbac-disabled.json":             [{"enabled": true, "level": "danger"}],
+    "aks-aad-not-integrated.json":        [{"enabled": true, "level": "danger"}],
+    "aks-network-policy-disabled.json":   [{"enabled": true, "level": "warning"}],
+    "acr-admin-user-enabled.json":        [{"enabled": true, "level": "danger"}],
+    "acr-public-access.json":             [{"enabled": true, "level": "warning"}],
+    "acr-defender-not-enabled.json":      [{"enabled": true, "level": "warning"}],
+    "cosmosdb-public-network-access.json":[{"enabled": true, "level": "danger"}],
+    "cosmosdb-no-ip-firewall.json":       [{"enabled": true, "level": "warning"}],
+    "cosmosdb-no-automatic-failover.json":[{"enabled": true, "level": "warning"}]
   }
 }

@@ -1,0 +1,18 @@
+{
+  "id": "OS-02",
+  "name": "OpenSearch domain encryption at rest disabled",
+  "description": "Encryption at rest is not enabled for this OpenSearch domain. Without encryption, data stored in indices, automated snapshots, and swap files is readable by anyone with physical or hypervisor-level access to the underlying storage.",
+  "severity": "MEDIUM",
+  "service": "opensearch",
+  "path": "opensearch.domains.*",
+  "conditions": ["EncryptionAtRestEnabled", "false"],
+  "remediation": "Enable encryption at rest when creating a new domain (cannot be enabled on an existing domain without recreation). Use an AWS-managed key or a KMS CMK. Recreate the domain with encryption enabled and migrate the data.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.4.1"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "3.5"},
+    {"name": "HIPAA", "version": "2013", "reference": "164.312(a)(2)(iv)"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/encryption-at-rest.html"
+  ]
+}

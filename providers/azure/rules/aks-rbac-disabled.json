@@ -1,0 +1,17 @@
+{
+  "id": "AKS-01",
+  "name": "AKS cluster RBAC disabled",
+  "description": "Kubernetes RBAC is disabled on this AKS cluster. Without RBAC, all authenticated users have unrestricted access to the Kubernetes API, making it impossible to enforce least-privilege access controls within the cluster.",
+  "severity": "HIGH",
+  "service": "aks",
+  "path": "aks.clusters.*",
+  "conditions": ["rbacEnabled", "false"],
+  "remediation": "Enable Kubernetes RBAC on the cluster. Create namespaced RoleBindings and ClusterRoleBindings to grant least-privilege access. Integrate with Azure AD for identity-based RBAC. Note: enabling RBAC on an existing cluster requires a cluster upgrade.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.5"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-4"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/aks/concepts-identity"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "ACR-01",
+  "name": "Container Registry admin user account enabled",
+  "description": "The built-in admin user account is enabled on this Azure Container Registry. The admin account has full access to the registry using a shared username and password. Shared credentials cannot be individually audited, rotated per-user, or subject to MFA.",
+  "severity": "HIGH",
+  "service": "containerregistry",
+  "path": "containerregistry.registries.*",
+  "conditions": ["adminUserEnabled", "true"],
+  "remediation": "Disable the admin user account. Use Azure RBAC with service principals or managed identities for CI/CD pipelines, and user-assigned managed identities for AKS pull access. Assign the AcrPull or AcrPush roles as needed.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "7.3"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "8.2.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication"
+  ]
+}

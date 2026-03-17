@@ -1,0 +1,17 @@
+{
+  "id": "ECR-02",
+  "name": "ECR repository image tag mutability not enforced",
+  "description": "Image tag mutability is set to MUTABLE for this ECR repository, allowing image tags to be overwritten. This undermines deployment traceability and can enable a supply chain attack where a trusted tag is replaced with a malicious image.",
+  "severity": "MEDIUM",
+  "service": "ecr",
+  "path": "ecr.repositories.*",
+  "conditions": ["tagImmutability", "false"],
+  "remediation": "Set image tag mutability to IMMUTABLE. Use unique, content-addressable tags (e.g., commit SHA or build ID) rather than mutable tags like 'latest'. Reference images by digest in deployment manifests.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.5.2"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.DS-6"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "EKS-02",
+  "name": "EKS cluster control plane logging not fully enabled",
+  "description": "EKS control plane logging is not enabled for all log types (api, audit, authenticator, controllerManager, scheduler). Without complete logging, security-relevant events such as API calls, authentication attempts, and control-plane operations are invisible.",
+  "severity": "MEDIUM",
+  "service": "eks",
+  "path": "eks.clusters.*",
+  "conditions": ["loggingEnabled", "false"],
+  "remediation": "Enable all control plane log types: API server, audit, authenticator, controller manager, and scheduler. Send logs to CloudWatch Logs and configure metric filters and alarms on audit log anomalies.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.4.4"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "10.2"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html"
+  ]
+}

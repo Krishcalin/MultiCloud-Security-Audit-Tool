@@ -1,0 +1,17 @@
+{
+  "id": "GKE-01",
+  "name": "GKE cluster master endpoint is publicly accessible",
+  "description": "The GKE cluster's Kubernetes API server (master endpoint) is accessible from the public internet. Exposure of the Kubernetes API server enables brute-force attacks, credential stuffing, and exploitation of API server vulnerabilities.",
+  "severity": "HIGH",
+  "service": "gke",
+  "path": "gke.clusters.*",
+  "conditions": ["masterEndpointPublic", "true"],
+  "remediation": "Enable the private cluster feature to deploy the master endpoint in a VPC. Enable master authorized networks to restrict access to specific CIDR ranges. Use Cloud VPN or Cloud Interconnect for internal access.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "6.6.2"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters"
+  ]
+}

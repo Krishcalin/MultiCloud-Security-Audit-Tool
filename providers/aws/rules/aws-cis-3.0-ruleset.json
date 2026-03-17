@@ -25,6 +25,18 @@
     "kms-key-rotation-disabled.json":[{"enabled": true, "level": "warning"}],
     "vpc-flow-logs-disabled.json":   [{"enabled": true, "level": "warning"}],
     "guardduty-disabled.json":       [{"enabled": true, "level": "danger"}],
-    "config-not-enabled.json":       [{"enabled": true, "level": "warning"}]
+    "config-not-enabled.json":       [{"enabled": true, "level": "warning"}],
+    "lambda-public-url.json":                [{"enabled": true, "level": "danger"}],
+    "lambda-deprecated-runtime.json":        [{"enabled": true, "level": "warning"}],
+    "eks-public-endpoint.json":              [{"enabled": true, "level": "danger"}],
+    "eks-logging-disabled.json":             [{"enabled": true, "level": "warning"}],
+    "eks-secrets-not-encrypted.json":        [{"enabled": true, "level": "danger"}],
+    "ecr-scan-on-push.json":                 [{"enabled": true, "level": "warning"}],
+    "ecr-tag-immutability.json":             [{"enabled": true, "level": "warning"}],
+    "secretsmanager-rotation-disabled.json": [{"enabled": true, "level": "warning"}],
+    "secretsmanager-stale-secret.json":      [{"enabled": true, "level": "warning"}],
+    "opensearch-not-in-vpc.json":            [{"enabled": true, "level": "danger"}],
+    "opensearch-encryption-at-rest.json":    [{"enabled": true, "level": "warning"}],
+    "opensearch-node-to-node-encryption.json": [{"enabled": true, "level": "warning"}]
   }
 }

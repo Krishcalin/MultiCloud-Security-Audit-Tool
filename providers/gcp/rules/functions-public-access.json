@@ -1,0 +1,17 @@
+{
+  "id": "FUNC-01",
+  "name": "Cloud Function is publicly invocable",
+  "description": "This Cloud Function grants the roles/cloudfunctions.invoker role to allUsers or allAuthenticatedUsers, allowing anyone on the internet to invoke it without authentication. Unauthenticated invocation can lead to unauthorized code execution, data exposure, or abuse.",
+  "severity": "HIGH",
+  "service": "functions",
+  "path": "functions.functions.*",
+  "conditions": ["isPubliclyInvocable", "true"],
+  "remediation": "Remove allUsers and allAuthenticatedUsers from the Cloud Function's IAM policy. If the function must be publicly accessible, place a Cloud Load Balancer or API Gateway (Cloud Endpoints) with authentication in front of it.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "4.11"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://cloud.google.com/functions/docs/securing/managing-access-iam"
+  ]
+}

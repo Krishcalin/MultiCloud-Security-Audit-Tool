@@ -1,0 +1,17 @@
+{
+  "id": "COSMOS-03",
+  "name": "Cosmos DB account automatic failover not enabled",
+  "description": "Automatic failover is not enabled for this Cosmos DB account. Without automatic failover, a regional outage requires manual intervention to promote a secondary region, leading to prolonged downtime.",
+  "severity": "LOW",
+  "service": "cosmosdb",
+  "path": "cosmosdb.accounts.*",
+  "conditions": ["automaticFailover", "false"],
+  "remediation": "Enable automatic failover and configure at least one additional region. Define failover priority order. For write-heavy workloads, consider enabling multiple write locations.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "4.5.3"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.IP-9"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability"
+  ]
+}

@@ -31,6 +31,9 @@ from .services.sql        import fetch_sql
 from .services.monitor    import fetch_monitor
 from .services.security   import fetch_security
 from .services.appservice import fetch_appservice
+from .services.aks               import fetch_aks
+from .services.containerregistry import fetch_containerregistry
+from .services.cosmosdb          import fetch_cosmosdb
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +47,9 @@ _SERVICE_FETCHERS = {
     "monitor":    fetch_monitor,
     "security":   fetch_security,
     "appservice": fetch_appservice,
+    "aks":               fetch_aks,
+    "containerregistry": fetch_containerregistry,
+    "cosmosdb":          fetch_cosmosdb,
 }
 
 PROVIDER = "azure"

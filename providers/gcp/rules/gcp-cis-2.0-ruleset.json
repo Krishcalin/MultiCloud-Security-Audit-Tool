@@ -20,6 +20,14 @@
     "sql-backup-disabled.json":          [{"enabled": true, "level": "warning"}],
     "logging-audit-logs-disabled.json":  [{"enabled": true, "level": "danger"}],
     "logging-no-sink.json":              [{"enabled": true, "level": "warning"}],
-    "kms-key-rotation-disabled.json":    [{"enabled": true, "level": "warning"}]
+    "kms-key-rotation-disabled.json":    [{"enabled": true, "level": "warning"}],
+    "gke-public-master-endpoint.json":             [{"enabled": true, "level": "danger"}],
+    "gke-default-sa-full-access.json":             [{"enabled": true, "level": "danger"}],
+    "gke-network-policy-disabled.json":            [{"enabled": true, "level": "warning"}],
+    "gke-master-authorized-networks-disabled.json":[{"enabled": true, "level": "warning"}],
+    "bigquery-dataset-public.json":                [{"enabled": true, "level": "danger"}],
+    "bigquery-no-cmek.json":                       [{"enabled": true, "level": "warning"}],
+    "functions-public-access.json":                [{"enabled": true, "level": "danger"}],
+    "functions-deprecated-runtime.json":           [{"enabled": true, "level": "warning"}]
   }
 }

@@ -1,0 +1,17 @@
+{
+  "id": "AKS-02",
+  "name": "AKS cluster not integrated with Azure Active Directory",
+  "description": "This AKS cluster is not integrated with Azure Active Directory for authentication. Without AAD integration, the cluster uses local Kubernetes service accounts for authentication, which lack enterprise identity controls such as MFA, conditional access, and centralized audit logging.",
+  "severity": "HIGH",
+  "service": "aks",
+  "path": "aks.clusters.*",
+  "conditions": ["aadIntegrated", "false"],
+  "remediation": "Enable AKS-managed AAD integration. Migrate from local accounts to AAD-backed identities. Configure Azure RBAC for Kubernetes authorization to leverage Azure AD groups for cluster access.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.2"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "8.2.1"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/aks/enable-authentication-microsoft-entra-id"
+  ]
+}

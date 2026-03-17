@@ -1,0 +1,17 @@
+{
+  "id": "EKS-01",
+  "name": "EKS cluster API server endpoint is publicly accessible",
+  "description": "The EKS cluster Kubernetes API server endpoint is accessible from the public internet. Exposure of the API server increases the risk of brute-force, credential stuffing, or exploitation of API server vulnerabilities.",
+  "severity": "HIGH",
+  "service": "eks",
+  "path": "eks.clusters.*",
+  "conditions": ["endpointPublicAccess", "true"],
+  "remediation": "Disable public endpoint access and enable private endpoint access. If public access is required, restrict publicAccessCidrs to known corporate IP ranges. Use a VPN or bastion host for cluster management.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.4.1"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html"
+  ]
+}

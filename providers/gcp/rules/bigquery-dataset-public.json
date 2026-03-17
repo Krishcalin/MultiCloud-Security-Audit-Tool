@@ -1,0 +1,18 @@
+{
+  "id": "BQ-01",
+  "name": "BigQuery dataset is publicly accessible",
+  "description": "This BigQuery dataset grants access to allUsers or allAuthenticatedUsers, making the data readable by anyone on the internet. Publicly accessible datasets can lead to sensitive data exposure, compliance violations, and reputational damage.",
+  "severity": "CRITICAL",
+  "service": "bigquery",
+  "path": "bigquery.datasets.*",
+  "conditions": ["isPubliclyAccessible", "true"],
+  "remediation": "Remove allUsers and allAuthenticatedUsers from the dataset's ACL immediately. Grant access only to specific service accounts, Google Groups, or user identities that require it. Enable audit logging for BigQuery data access events.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "7.1"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "7.2"},
+    {"name": "HIPAA", "version": "2013", "reference": "164.312(a)(1)"}
+  ],
+  "references": [
+    "https://cloud.google.com/bigquery/docs/access-control"
+  ]
+}

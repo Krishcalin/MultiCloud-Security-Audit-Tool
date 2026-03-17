@@ -1,0 +1,17 @@
+{
+  "id": "LAMBDA-02",
+  "name": "Lambda function using deprecated runtime",
+  "description": "The Lambda function is configured with a runtime that has reached end-of-life. Deprecated runtimes no longer receive security patches, leaving functions vulnerable to known exploits.",
+  "severity": "MEDIUM",
+  "service": "lambda",
+  "path": "lambda.functions.*",
+  "conditions": ["isDeprecatedRuntime", "true"],
+  "remediation": "Update the Lambda function to a supported runtime (e.g., nodejs20.x, python3.12, java21). Test the function thoroughly after migration. Use Lambda Layers to separate dependencies from runtime upgrades.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.3"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "6.3.3"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html"
+  ]
+}

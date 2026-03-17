@@ -1,0 +1,17 @@
+{
+  "id": "LAMBDA-01",
+  "name": "Lambda function URL with no authentication",
+  "description": "The Lambda function has a Function URL configured with AuthType=NONE, allowing anyone on the internet to invoke it without authentication. This can lead to unauthorized code execution, data exposure, or cost abuse.",
+  "severity": "CRITICAL",
+  "service": "lambda",
+  "path": "lambda.functions.*",
+  "conditions": ["hasPublicFunctionUrl", "true"],
+  "remediation": "Change the Function URL AuthType to AWS_IAM. If public access is required, implement a custom authorizer in the function code or place an API Gateway with an authorizer in front of the Lambda.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.1"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html"
+  ]
+}

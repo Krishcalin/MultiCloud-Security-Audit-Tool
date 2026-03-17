@@ -1,0 +1,17 @@
+{
+  "id": "ECR-01",
+  "name": "ECR repository scan on push disabled",
+  "description": "Image scanning on push is disabled for this ECR repository. Without automated vulnerability scanning, container images with known CVEs can be deployed to production undetected.",
+  "severity": "MEDIUM",
+  "service": "ecr",
+  "path": "ecr.repositories.*",
+  "conditions": ["imageScanningOnPush", "false"],
+  "remediation": "Enable scan-on-push for the ECR repository. Review scan findings in the ECR console or via the describe-image-scan-findings API. Integrate scanning results into the CI/CD pipeline to block deployments of vulnerable images.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "5.5.1"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "ID.RA-1"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html"
+  ]
+}

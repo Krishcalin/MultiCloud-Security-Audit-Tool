@@ -1,0 +1,18 @@
+{
+  "id": "BQ-02",
+  "name": "BigQuery dataset not using customer-managed encryption key",
+  "description": "This BigQuery dataset is encrypted with a Google-managed key rather than a customer-managed encryption key (CMEK). Using CMEK gives you control over the encryption key lifecycle, enabling you to revoke access instantly by disabling or destroying the key.",
+  "severity": "LOW",
+  "service": "bigquery",
+  "path": "bigquery.datasets.*",
+  "conditions": ["cmekEnabled", "false"],
+  "remediation": "Configure a Cloud KMS CMEK for the BigQuery dataset. Create a KMS key ring and key, grant the BigQuery service account the cloudkms.cryptoKeyEncrypterDecrypter role, then set the default encryption key on the dataset.",
+  "compliance": [
+    {"name": "CIS GCP Foundations", "version": "2.0", "reference": "7.3"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "3.5"},
+    {"name": "HIPAA", "version": "2013", "reference": "164.312(a)(2)(iv)"}
+  ],
+  "references": [
+    "https://cloud.google.com/bigquery/docs/customer-managed-encryption"
+  ]
+}

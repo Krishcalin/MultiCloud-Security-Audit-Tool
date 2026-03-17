@@ -1,0 +1,17 @@
+{
+  "id": "COSMOS-02",
+  "name": "Cosmos DB account has no IP firewall rules configured",
+  "description": "This Cosmos DB account has no IP-based firewall rules configured and public network access is enabled. Any IP address can reach the account's data plane endpoints, relying solely on the primary/secondary key or AAD authentication for protection.",
+  "severity": "MEDIUM",
+  "service": "cosmosdb",
+  "path": "cosmosdb.accounts.*",
+  "conditions": ["isIpFirewallConfigured", "false"],
+  "remediation": "Configure IP firewall rules to restrict access to known application and management IP ranges. For production workloads, prefer private endpoints over IP-based access controls. Remove the 0.0.0.0 catch-all rule that allows all Azure services.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "4.5.2"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-firewall"
+  ]
+}

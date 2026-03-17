@@ -1,0 +1,17 @@
+{
+  "id": "ACR-02",
+  "name": "Container Registry allows public network access",
+  "description": "Public network access is enabled on this Azure Container Registry. This exposes the registry's REST API and data plane to the internet, increasing the risk of unauthorized access, credential brute-force, or exploitation of registry vulnerabilities.",
+  "severity": "MEDIUM",
+  "service": "containerregistry",
+  "path": "containerregistry.registries.*",
+  "conditions": ["publicNetworkAccess", "Enabled"],
+  "remediation": "Disable public network access and configure a private endpoint with Azure Private Link. Restrict registry access to VNet-integrated workloads (AKS, VMs) via the private endpoint. Use service endpoints or firewall rules as a transitional control.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "7.4"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-3"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link"
+  ]
+}

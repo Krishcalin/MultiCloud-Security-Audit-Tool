@@ -1,0 +1,17 @@
+{
+  "id": "AKS-03",
+  "name": "AKS cluster network policy not configured",
+  "description": "No Kubernetes NetworkPolicy engine is configured on this AKS cluster. Without a network policy engine (Azure CNI or Calico), all pods can communicate with all other pods in the cluster without restriction, enabling lateral movement after a pod compromise.",
+  "severity": "MEDIUM",
+  "service": "aks",
+  "path": "aks.clusters.*",
+  "conditions": ["networkPolicyEnabled", "false"],
+  "remediation": "Enable a network policy engine (Azure CNI network policies or Calico) when creating or upgrading the cluster. Define NetworkPolicy resources to explicitly allow required inter-pod traffic and deny all else by default.",
+  "compliance": [
+    {"name": "CIS Azure Foundations", "version": "2.0", "reference": "8.6"},
+    {"name": "NIST CSF", "version": "1.1", "reference": "PR.AC-5"}
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/azure/aks/use-network-policies"
+  ]
+}

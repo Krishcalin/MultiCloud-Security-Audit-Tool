@@ -31,6 +31,11 @@ from .services.guardduty   import fetch_guardduty
 from .services.config      import fetch_config
 from .services.sns         import fetch_sns
 from .services.sqs         import fetch_sqs
+from .services.lambda_       import fetch_lambda
+from .services.eks           import fetch_eks
+from .services.ecr           import fetch_ecr
+from .services.secretsmanager import fetch_secretsmanager
+from .services.opensearch    import fetch_opensearch
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +53,11 @@ _SERVICE_FETCHERS = {
     "config":     fetch_config,
     "sns":        fetch_sns,
     "sqs":        fetch_sqs,
+    "lambda":         fetch_lambda,
+    "eks":            fetch_eks,
+    "ecr":            fetch_ecr,
+    "secretsmanager": fetch_secretsmanager,
+    "opensearch":     fetch_opensearch,
 }
 
 PROVIDER = "aws"

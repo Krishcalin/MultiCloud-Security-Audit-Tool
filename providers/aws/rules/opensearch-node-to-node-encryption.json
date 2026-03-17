@@ -1,0 +1,17 @@
+{
+  "id": "OS-03",
+  "name": "OpenSearch node-to-node encryption disabled",
+  "description": "Node-to-node encryption is not enabled for this OpenSearch domain. Without it, data travelling between the nodes of a multi-node cluster is transmitted in plaintext over the internal network, exposing it to eavesdropping on the VPC.",
+  "severity": "MEDIUM",
+  "service": "opensearch",
+  "path": "opensearch.domains.*",
+  "conditions": ["NodeToNodeEncryptionEnabled", "false"],
+  "remediation": "Enable node-to-node encryption. Like encryption at rest, this requires domain recreation. Migrate data to a new domain with both encryption at rest and node-to-node encryption enabled.",
+  "compliance": [
+    {"name": "CIS AWS Foundations", "version": "3.0", "reference": "2.4.2"},
+    {"name": "PCI-DSS", "version": "4.0", "reference": "4.2.1"}
+  ],
+  "references": [
+    "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ntn.html"
+  ]
+}
