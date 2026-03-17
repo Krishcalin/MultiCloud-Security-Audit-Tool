@@ -1,4 +1,4 @@
-"""HTML report generator — Phase 5 enhanced edition.
+"""HTML report generator — Phase 7 enhanced edition.
 
 Produces a self-contained, single-file HTML report with:
 
@@ -71,6 +71,7 @@ def save_html(
     meta:       Optional[Dict[str, Any]] = None,
     posture:    Optional[Dict[str, Any]] = None,
     compliance: Optional[Dict[str, Any]] = None,
+    suppressed: Optional[List[Any]] = None,
 ) -> None:
     """Render findings to a self-contained HTML file.
 
@@ -81,6 +82,7 @@ def save_html(
     meta:       Optional scan metadata (scan_date, account, version, …).
     posture:    Optional score dict from :func:`core.scoring.compute_score`.
     compliance: Optional frameworks dict from :func:`core.compliance.aggregate_compliance`.
+    suppressed: Optional list of suppressed Finding objects (greyed-out section).
     """
     meta = meta or {}
 
@@ -92,7 +94,7 @@ def save_html(
         from core.compliance import aggregate_compliance
         compliance = aggregate_compliance(findings)
 
-    html = _render(findings, meta, posture, compliance)
+    html = _render(findings, meta, posture, compliance, suppressed=suppressed or [])
     Path(path).write_text(html, encoding="utf-8")
 
 
@@ -105,7 +107,9 @@ def _render(
     meta:       Dict[str, Any],
     posture:    Dict[str, Any],
     compliance: Dict[str, Any],
+    suppressed: List[Any] = None,
 ) -> str:
+    suppressed = suppressed or []
     scan_date = meta.get("scan_date", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))
     version   = meta.get("version", "")
     account   = meta.get("account", "")
@@ -127,13 +131,14 @@ def _render(
         svc_resources[svc] += f.flagged_count
 
     # Build HTML sections
-    header_html     = _header(version, scan_date, account, providers)
-    posture_html    = _posture_section(posture, sev_counts, total_findings, total_resources)
-    compliance_html = _compliance_section(compliance) if compliance else ""
-    providers_html  = _providers_section(providers)
-    service_html    = _service_section(services, svc_resources)
-    findings_html   = _findings_section(findings, providers)
-    findings_json   = _html.escape(json.dumps([f.to_dict() for f in findings], default=str), quote=True)
+    header_html      = _header(version, scan_date, account, providers, suppressed_count=len(suppressed))
+    posture_html     = _posture_section(posture, sev_counts, total_findings, total_resources)
+    compliance_html  = _compliance_section(compliance) if compliance else ""
+    providers_html   = _providers_section(providers)
+    service_html     = _service_section(services, svc_resources)
+    findings_html    = _findings_section(findings, providers)
+    suppressed_html  = _suppressed_section(suppressed) if suppressed else ""
+    findings_json    = _html.escape(json.dumps([f.to_dict() for f in findings], default=str), quote=True)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -153,6 +158,7 @@ def _render(
 {providers_html}
 {service_html}
 {findings_html}
+{suppressed_html}
 </div>
 
 <div class="footer">
@@ -169,7 +175,7 @@ def _render(
 # Header
 # ---------------------------------------------------------------------------
 
-def _header(version: str, scan_date: str, account: str, providers: Dict) -> str:
+def _header(version: str, scan_date: str, account: str, providers: Dict, suppressed_count: int = 0) -> str:
     prov_badges = ""
     for p in ["aws", "azure", "gcp"]:
         colour = _PROVIDER_COLOUR.get(p, "#888")
@@ -179,6 +185,12 @@ def _header(version: str, scan_date: str, account: str, providers: Dict) -> str:
             f'border-color:{colour};'
             f'{"color:" + colour + ";background:rgba(0,0,0,0.3)" if active else "color:#484f58"}'
             f'">{p.upper()}</span>'
+        )
+    if suppressed_count:
+        prov_badges += (
+            f'<span class="hbadge" style="border-color:#555;color:#8b949e" '
+            f'title="{suppressed_count} finding(s) suppressed via exceptions file">'
+            f'&#128683; {suppressed_count} suppressed</span>'
         )
     meta_parts = [_html.escape(scan_date)]
     if account:
@@ -436,6 +448,8 @@ def _service_section(
 # ---------------------------------------------------------------------------
 
 def _findings_section(findings: List[Finding], providers: Dict) -> str:
+    from output.remediation import get_remediation_commands
+
     total = len(findings)
 
     rows = ""
@@ -479,12 +493,37 @@ def _findings_section(findings: List[Finding], providers: Dict) -> str:
         if count > 5:
             res_html += f'<li><em>&hellip; and {count - 5} more</em></li>'
 
+        # Fix Commands panel
+        fix_html = ""
+        try:
+            rem_entries = get_remediation_commands(f)
+        except Exception:
+            rem_entries = []
+        if rem_entries:
+            fix_id = f"fix{i}"
+            fix_blocks = ""
+            for entry in rem_entries:
+                rid_val = _html.escape(entry["resource_id"])
+                if entry["commands"]:
+                    cmds_escaped = _html.escape("\n".join(entry["commands"]))
+                    fix_blocks += f'<div class="fix-resource">Resource: <strong>{rid_val}</strong></div>'
+                    fix_blocks += f'<pre class="fix-pre">{cmds_escaped}</pre>'
+                if entry["note"]:
+                    note_escaped = _html.escape(entry["note"])
+                    fix_blocks += f'<div class="fix-note">[MANUAL] {rid_val}:<br/><pre class="fix-pre fix-note-pre">{note_escaped}</pre></div>'
+            fix_html = (
+                f'<div class="dl mt12">'
+                f'<button class="fix-btn" onclick="toggleFix(\'{fix_id}\',this)">&#128295; Fix Commands</button>'
+                f'</div>'
+                f'<div id="{fix_id}" class="fix-panel" style="display:none">{fix_blocks}</div>'
+            )
+
         did = f"d{i}"
         txt = _html.escape(f"{f.rule_id} {f.name} {f.description} {f.service}", quote=True).lower()
 
         rows += f"""<tr class="fr" data-severity="{sev}" data-provider="{prov}" data-service="{svc}" data-text="{txt}" style="border-left:3px solid {colour}">
   <td><span class="badge {badge}">{sev}</span></td>
-  <td class="mono">{rid}</td>
+  <td class="mono">{_html.escape(f.rule_id)}</td>
   <td><span class="ptag" style="border-color:{pc};color:{pc}">{prov.upper()}</span></td>
   <td>{svc}</td>
   <td><strong>{name}</strong></td>
@@ -500,6 +539,7 @@ def _findings_section(findings: List[Finding], providers: Dict) -> str:
           <div class="dv">{desc}</div>
           <div class="dl mt12">Remediation</div>
           <div class="dv remediation">{remed}</div>
+          {fix_html}
           {('<div class="dl mt12">Compliance</div><div class="dv">' + comp_html + '</div>') if comp_html else ''}
           {('<div class="dl mt12">References</div><div class="dv">' + refs_html + '</div>') if refs_html else ''}
           <div class="dl mt12">Resource Path</div>
@@ -563,6 +603,60 @@ def _findings_section(findings: List[Finding], providers: Dict) -> str:
       <tbody id="tb">{rows}</tbody>
     </table>
     <div id="nr" class="no-results" style="display:none">No findings match the current filters.</div>
+  </div>
+</section>"""
+
+
+# ---------------------------------------------------------------------------
+# Suppressed Findings section
+# ---------------------------------------------------------------------------
+
+def _suppressed_section(suppressed_findings: List[Any]) -> str:
+    if not suppressed_findings:
+        return ""
+
+    count = len(suppressed_findings)
+    rows = ""
+    for f in suppressed_findings:
+        sev    = getattr(f, "severity", "INFO")
+        badge  = _SEV_BADGE.get(sev, "badge-info")
+        rid    = _html.escape(getattr(f, "rule_id", ""))
+        prov   = _html.escape(getattr(f, "provider", "") or "")
+        svc    = _html.escape(getattr(f, "service", "") or "")
+        name   = _html.escape(getattr(f, "name", ""))
+        pc     = _PROVIDER_COLOUR.get((getattr(f, "provider", "") or "").lower(), "#8b949e")
+        flagged = getattr(f, "flagged_items", []) or []
+        resources = ", ".join(_html.escape(str(item.get("id", ""))) for item in flagged[:3])
+        if len(flagged) > 3:
+            resources += f" (+{len(flagged) - 3} more)"
+
+        rows += f"""<tr class="sup-row">
+  <td><span class="badge {badge}">{_html.escape(sev)}</span></td>
+  <td class="mono">{rid}</td>
+  <td><span class="ptag" style="border-color:{pc};color:{pc}">{prov.upper()}</span></td>
+  <td>{svc}</td>
+  <td>{name}</td>
+  <td class="sup-resources">{resources}</td>
+</tr>"""
+
+    return f"""<section id="suppressed" class="section" style="opacity:0.65">
+  <h2 class="section-title">Suppressed Findings <span class="count-badge">{count}</span>
+    <span style="font-size:11px;color:#8b949e;font-weight:400;margin-left:8px">&#128683; Matched by exceptions file</span>
+  </h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:100px">Severity</th>
+          <th style="width:100px">Rule ID</th>
+          <th style="width:85px">Provider</th>
+          <th style="width:110px">Service</th>
+          <th>Finding</th>
+          <th>Affected Resources</th>
+        </tr>
+      </thead>
+      <tbody>{rows}</tbody>
+    </table>
   </div>
 </section>"""
 
@@ -693,6 +787,21 @@ td{padding:10px 12px;border-bottom:1px solid #21262d;vertical-align:middle}
 
 /* Footer */
 .footer{text-align:center;padding:20px;color:#484f58;font-size:12px;border-top:1px solid #21262d;margin-top:12px}
+
+/* Fix Commands panel */
+.fix-btn{background:#1c2128;border:1px solid #30363d;color:#8b949e;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:5px;margin-top:4px;transition:all .15s}
+.fix-btn:hover{background:#21262d;color:#58a6ff;border-color:#58a6ff}
+.fix-panel{margin-top:8px;border:1px solid #30363d;border-radius:6px;overflow:hidden}
+.fix-resource{font-size:11px;color:#8b949e;padding:6px 12px 2px;background:#0d1117;text-transform:uppercase;letter-spacing:.3px}
+.fix-pre{background:#0a0d12;color:#79c0ff;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12px;padding:10px 14px;margin:0;white-space:pre-wrap;word-break:break-all;border-top:1px solid #21262d}
+.fix-note{padding:4px 0}
+.fix-note-pre{color:#ffcc00}
+
+/* Suppressed findings */
+.sup-row td{color:#484f58}
+.sup-row .badge{opacity:0.5}
+.sup-row .ptag{opacity:0.5}
+.sup-resources{font-size:12px;color:#484f58}
 </style>"""
 
 
@@ -759,6 +868,14 @@ function toggleDetail(id, btn) {{
   const open = row.style.display !== 'none';
   row.style.display = open ? 'none' : '';
   btn.innerHTML = open ? '&#9660;' : '&#9650;';
+}}
+
+function toggleFix(id, btn) {{
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : '';
+  btn.innerHTML = open ? '&#128295; Fix Commands' : '&#128295; Hide Commands';
 }}
 </script>
 <script id="fd" type="application/json">{findings_json}</script>"""

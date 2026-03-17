@@ -8,19 +8,23 @@ Usage
     # Demo report (sample findings, no cloud credentials needed)
     python scout.py demo --html report.html
 
-    # AWS live audit  (Phase 2 — coming soon)
+    # AWS live audit  (Phase 2)
     python scout.py aws --region us-east-1 --html aws_report.html
 
     # Azure live audit  (Phase 3)
     python scout.py azure --subscription-id <SUB_ID> --html azure_report.html
 
-    # GCP live audit   (Phase 4 — coming soon)
+    # GCP live audit   (Phase 4)
     python scout.py gcp --project <PROJECT_ID> --html gcp_report.html
 
 Phase 1 delivers the core engine, base classes, and the ``demo`` subcommand.
 Phase 2 adds the AWS live provider (CIS AWS Foundations v3.0).
 Phase 3 adds the Azure live provider (CIS Azure Foundations v2.0).
 Phase 4 adds the GCP live provider (CIS GCP Foundations v2.0).
+Phase 5 adds the HTML report generator with posture scoring and compliance mapping.
+Phase 6 adds the service breakdown and findings table.
+Phase 7 adds exception/suppression management, SARIF output, JUnit XML output,
+        remediation scripts, and GitHub Actions CI/CD integration.
 """
 
 from __future__ import annotations
@@ -36,7 +40,7 @@ from typing import Any, Dict, List
 # Version
 # ---------------------------------------------------------------------------
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 # ---------------------------------------------------------------------------
 # Demo data — exercises every engine feature and all severity levels
@@ -405,6 +409,10 @@ Examples:
     demo_p = sub.add_parser("demo", help="Generate a sample report with built-in demo findings (no credentials needed)")
     demo_p.add_argument("--html", metavar="FILE", help="Write HTML report to FILE")
     demo_p.add_argument("--json", metavar="FILE", help="Write JSON findings to FILE")
+    demo_p.add_argument("--exceptions",         metavar="FILE", help="YAML exceptions/suppressions file")
+    demo_p.add_argument("--sarif",              metavar="FILE", help="Write SARIF 2.1.0 output to FILE")
+    demo_p.add_argument("--junit",              metavar="FILE", help="Write JUnit XML output to FILE")
+    demo_p.add_argument("--remediation-script", metavar="FILE", help="Write CLI remediation shell script to FILE")
     demo_p.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     # ---- aws (Phase 2) ----
@@ -415,6 +423,10 @@ Examples:
     aws_p.add_argument("--ruleset",  metavar="FILE",      help="Custom ruleset JSON")
     aws_p.add_argument("--html",     metavar="FILE",      help="Write HTML report to FILE")
     aws_p.add_argument("--json",     metavar="FILE",      help="Write JSON findings to FILE")
+    aws_p.add_argument("--exceptions",         metavar="FILE", help="YAML exceptions/suppressions file")
+    aws_p.add_argument("--sarif",              metavar="FILE", help="Write SARIF 2.1.0 output to FILE")
+    aws_p.add_argument("--junit",              metavar="FILE", help="Write JUnit XML output to FILE")
+    aws_p.add_argument("--remediation-script", metavar="FILE", help="Write CLI remediation shell script to FILE")
     aws_p.add_argument("-v", "--verbose", action="store_true")
 
     # ---- azure (Phase 3) ----
@@ -425,6 +437,10 @@ Examples:
     az_p.add_argument("--client-secret",   metavar="SECRET")
     az_p.add_argument("--html",            metavar="FILE")
     az_p.add_argument("--json",            metavar="FILE")
+    az_p.add_argument("--exceptions",         metavar="FILE", help="YAML exceptions/suppressions file")
+    az_p.add_argument("--sarif",              metavar="FILE", help="Write SARIF 2.1.0 output to FILE")
+    az_p.add_argument("--junit",              metavar="FILE", help="Write JUnit XML output to FILE")
+    az_p.add_argument("--remediation-script", metavar="FILE", help="Write CLI remediation shell script to FILE")
     az_p.add_argument("-v", "--verbose",   action="store_true")
 
     # ---- gcp (Phase 4) ----
@@ -433,6 +449,10 @@ Examples:
     gcp_p.add_argument("--service-account-file", metavar="FILE")
     gcp_p.add_argument("--html",                 metavar="FILE")
     gcp_p.add_argument("--json",                 metavar="FILE")
+    gcp_p.add_argument("--exceptions",         metavar="FILE", help="YAML exceptions/suppressions file")
+    gcp_p.add_argument("--sarif",              metavar="FILE", help="Write SARIF 2.1.0 output to FILE")
+    gcp_p.add_argument("--junit",              metavar="FILE", help="Write JUnit XML output to FILE")
+    gcp_p.add_argument("--remediation-script", metavar="FILE", help="Write CLI remediation shell script to FILE")
     gcp_p.add_argument("-v", "--verbose",        action="store_true")
 
     return parser
@@ -495,6 +515,36 @@ def _run_demo(args: argparse.Namespace) -> int:
     print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
     print()
 
+    # --- Apply exceptions ---
+    suppressed_pairs = []
+    if getattr(args, "exceptions", None) and Path(args.exceptions).exists():
+        from core.exceptions import load_exceptions, apply_exceptions
+        exc_set = load_exceptions(args.exceptions)
+        findings, suppressed_pairs = apply_exceptions(findings, exc_set)
+        suppressed_findings = [f for f, _ in suppressed_pairs]
+        if suppressed_pairs:
+            print(f"  Suppressed : {len(suppressed_pairs)} finding(s) via exceptions file")
+    else:
+        suppressed_findings = []
+
+    # --- SARIF output ---
+    if getattr(args, "sarif", None):
+        from output.sarif import save_sarif
+        save_sarif(findings, args.sarif, tool_version=__version__, suppressed=suppressed_findings)
+        print(f"[+] SARIF report saved to: {args.sarif}")
+
+    # --- JUnit XML output ---
+    if getattr(args, "junit", None):
+        from output.junit import save_junit
+        save_junit(findings, args.junit)
+        print(f"[+] JUnit XML saved to: {args.junit}")
+
+    # --- Remediation script ---
+    if getattr(args, "remediation_script", None):
+        from output.remediation import save_remediation_script
+        save_remediation_script(findings, args.remediation_script)
+        print(f"[+] Remediation script saved to: {args.remediation_script}")
+
     # Save JSON
     if args.json:
         save_json(findings, args.json)
@@ -502,7 +552,7 @@ def _run_demo(args: argparse.Namespace) -> int:
 
     # Save HTML
     html_path = args.html or "multicloud_report.html"
-    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance, suppressed=suppressed_findings)
     print(f"[+] HTML report saved to: {html_path}")
 
     # Open in browser
@@ -601,13 +651,43 @@ def _run_aws(args: argparse.Namespace) -> int:
     print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
     print()
 
+    # --- Apply exceptions ---
+    suppressed_pairs = []
+    if getattr(args, "exceptions", None) and Path(args.exceptions).exists():
+        from core.exceptions import load_exceptions, apply_exceptions
+        exc_set = load_exceptions(args.exceptions)
+        findings, suppressed_pairs = apply_exceptions(findings, exc_set)
+        suppressed_findings = [f for f, _ in suppressed_pairs]
+        if suppressed_pairs:
+            print(f"  Suppressed : {len(suppressed_pairs)} finding(s) via exceptions file")
+    else:
+        suppressed_findings = []
+
+    # --- SARIF output ---
+    if getattr(args, "sarif", None):
+        from output.sarif import save_sarif
+        save_sarif(findings, args.sarif, tool_version=__version__, suppressed=suppressed_findings)
+        print(f"[+] SARIF report saved to: {args.sarif}")
+
+    # --- JUnit XML output ---
+    if getattr(args, "junit", None):
+        from output.junit import save_junit
+        save_junit(findings, args.junit)
+        print(f"[+] JUnit XML saved to: {args.junit}")
+
+    # --- Remediation script ---
+    if getattr(args, "remediation_script", None):
+        from output.remediation import save_remediation_script
+        save_remediation_script(findings, args.remediation_script)
+        print(f"[+] Remediation script saved to: {args.remediation_script}")
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
         print(f"[+] JSON report saved to: {args.json}")
 
     html_path = args.html or f"aws_{account_id}_report.html"
-    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance, suppressed=suppressed_findings)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser
@@ -713,6 +793,36 @@ def _run_azure(args: argparse.Namespace) -> int:
     print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
     print()
 
+    # --- Apply exceptions ---
+    suppressed_pairs = []
+    if getattr(args, "exceptions", None) and Path(args.exceptions).exists():
+        from core.exceptions import load_exceptions, apply_exceptions
+        exc_set = load_exceptions(args.exceptions)
+        findings, suppressed_pairs = apply_exceptions(findings, exc_set)
+        suppressed_findings = [f for f, _ in suppressed_pairs]
+        if suppressed_pairs:
+            print(f"  Suppressed : {len(suppressed_pairs)} finding(s) via exceptions file")
+    else:
+        suppressed_findings = []
+
+    # --- SARIF output ---
+    if getattr(args, "sarif", None):
+        from output.sarif import save_sarif
+        save_sarif(findings, args.sarif, tool_version=__version__, suppressed=suppressed_findings)
+        print(f"[+] SARIF report saved to: {args.sarif}")
+
+    # --- JUnit XML output ---
+    if getattr(args, "junit", None):
+        from output.junit import save_junit
+        save_junit(findings, args.junit)
+        print(f"[+] JUnit XML saved to: {args.junit}")
+
+    # --- Remediation script ---
+    if getattr(args, "remediation_script", None):
+        from output.remediation import save_remediation_script
+        save_remediation_script(findings, args.remediation_script)
+        print(f"[+] Remediation script saved to: {args.remediation_script}")
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
@@ -720,7 +830,7 @@ def _run_azure(args: argparse.Namespace) -> int:
 
     safe_sub = sub_id.replace("-", "")[:12]
     html_path = args.html or f"azure_{safe_sub}_report.html"
-    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance, suppressed=suppressed_findings)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser
@@ -822,6 +932,36 @@ def _run_gcp(args: argparse.Namespace) -> int:
     print(f"  Posture Score : {posture['score']}/100  Grade {posture['grade']} — {posture['label']}")
     print()
 
+    # --- Apply exceptions ---
+    suppressed_pairs = []
+    if getattr(args, "exceptions", None) and Path(args.exceptions).exists():
+        from core.exceptions import load_exceptions, apply_exceptions
+        exc_set = load_exceptions(args.exceptions)
+        findings, suppressed_pairs = apply_exceptions(findings, exc_set)
+        suppressed_findings = [f for f, _ in suppressed_pairs]
+        if suppressed_pairs:
+            print(f"  Suppressed : {len(suppressed_pairs)} finding(s) via exceptions file")
+    else:
+        suppressed_findings = []
+
+    # --- SARIF output ---
+    if getattr(args, "sarif", None):
+        from output.sarif import save_sarif
+        save_sarif(findings, args.sarif, tool_version=__version__, suppressed=suppressed_findings)
+        print(f"[+] SARIF report saved to: {args.sarif}")
+
+    # --- JUnit XML output ---
+    if getattr(args, "junit", None):
+        from output.junit import save_junit
+        save_junit(findings, args.junit)
+        print(f"[+] JUnit XML saved to: {args.junit}")
+
+    # --- Remediation script ---
+    if getattr(args, "remediation_script", None):
+        from output.remediation import save_remediation_script
+        save_remediation_script(findings, args.remediation_script)
+        print(f"[+] Remediation script saved to: {args.remediation_script}")
+
     # --- Save outputs ---
     if args.json:
         save_json(findings, args.json)
@@ -829,7 +969,7 @@ def _run_gcp(args: argparse.Namespace) -> int:
 
     safe_proj = project_id.replace("-", "_")[:20]
     html_path = args.html or f"gcp_{safe_proj}_report.html"
-    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance)
+    save_html(findings, html_path, meta=meta, posture=posture, compliance=compliance, suppressed=suppressed_findings)
     print(f"[+] HTML report saved to: {html_path}")
 
     import webbrowser

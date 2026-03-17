@@ -1,0 +1,262 @@
+# MultiCloud Security Audit Tool — GitHub Actions CI/CD Integration
+# Runs scheduled cloud security scans and uploads results to GitHub Code Scanning.
+#
+# Required secrets (set in Settings → Secrets → Actions):
+#   AWS:   AWS_ROLE_ARN (OIDC) or AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY
+#   Azure: AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
+#   GCP:   GCP_PROJECT_ID, GCP_SERVICE_ACCOUNT_KEY (base64-encoded JSON key)
+
+name: MultiCloud Security Scan
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Every Monday at 06:00 UTC
+  push:
+    branches: [main]
+    paths:
+      - "providers/**"
+      - "core/**"
+      - "scout.py"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Provider to scan (aws | azure | gcp | all)"
+        required: false
+        default: "all"
+
+jobs:
+  # -------------------------------------------------------------------------
+  # AWS Security Scan
+  # -------------------------------------------------------------------------
+  scan-aws:
+    name: AWS Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.provider == 'aws' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    permissions:
+      contents: read
+      security-events: write   # required for upload-sarif
+      id-token: write           # required for OIDC auth
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install boto3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
+        continue-on-error: true
+
+      - name: Run AWS security scan
+        run: |
+          python scout.py aws \
+            --region eu-west-1 \
+            --html aws-report.html \
+            --json aws-findings.json \
+            --sarif aws-results.sarif \
+            --junit aws-junit.xml \
+            --exceptions exceptions.yaml || true
+        env:
+          AWS_DEFAULT_REGION: eu-west-1
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: aws-results.sarif
+          category: aws-security
+
+      - name: Upload HTML report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aws-security-report
+          path: |
+            aws-report.html
+            aws-findings.json
+          retention-days: 30
+
+      - name: Publish JUnit test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: aws-junit.xml
+          check_name: "AWS Security Findings"
+
+  # -------------------------------------------------------------------------
+  # Azure Security Scan
+  # -------------------------------------------------------------------------
+  scan-azure:
+    name: Azure Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.provider == 'azure' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install azure-identity azure-mgmt-compute azure-mgmt-storage \
+            azure-mgmt-network azure-mgmt-resource azure-mgmt-authorization \
+            azure-mgmt-keyvault azure-mgmt-monitor azure-mgmt-security \
+            azure-mgmt-sql azure-mgmt-containerservice azure-mgmt-containerregistry \
+            azure-mgmt-cosmosdb msgraph-sdk
+
+      - name: Run Azure security scan
+        run: |
+          python scout.py azure \
+            --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            --tenant-id "${{ secrets.AZURE_TENANT_ID }}" \
+            --client-id "${{ secrets.AZURE_CLIENT_ID }}" \
+            --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" \
+            --html azure-report.html \
+            --json azure-findings.json \
+            --sarif azure-results.sarif \
+            --junit azure-junit.xml \
+            --exceptions exceptions.yaml || true
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: azure-results.sarif
+          category: azure-security
+
+      - name: Upload HTML report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: azure-security-report
+          path: |
+            azure-report.html
+            azure-findings.json
+          retention-days: 30
+
+      - name: Publish JUnit test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: azure-junit.xml
+          check_name: "Azure Security Findings"
+
+  # -------------------------------------------------------------------------
+  # GCP Security Scan
+  # -------------------------------------------------------------------------
+  scan-gcp:
+    name: GCP Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.provider == 'gcp' || github.event.inputs.provider == 'all' || github.event_name != 'workflow_dispatch' }}
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install google-auth google-api-python-client \
+            google-auth-httplib2 google-cloud-storage
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Run GCP security scan
+        run: |
+          python scout.py gcp \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --html gcp-report.html \
+            --json gcp-findings.json \
+            --sarif gcp-results.sarif \
+            --junit gcp-junit.xml \
+            --exceptions exceptions.yaml || true
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: gcp-results.sarif
+          category: gcp-security
+
+      - name: Upload HTML report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gcp-security-report
+          path: |
+            gcp-report.html
+            gcp-findings.json
+          retention-days: 30
+
+      - name: Publish JUnit test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: gcp-junit.xml
+          check_name: "GCP Security Findings"
+
+  # -------------------------------------------------------------------------
+  # Summary comment on PR
+  # -------------------------------------------------------------------------
+  scan-summary:
+    name: Post PR Summary
+    runs-on: ubuntu-latest
+    needs: [scan-aws, scan-azure, scan-gcp]
+    if: github.event_name == 'pull_request' && always()
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Post summary comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🔒 MultiCloud Security Scan Summary\n\n';
+            body += '| Provider | Report |\n|---|---|\n';
+            body += '| AWS | See artifacts: `aws-security-report` |\n';
+            body += '| Azure | See artifacts: `azure-security-report` |\n';
+            body += '| GCP | See artifacts: `gcp-security-report` |\n\n';
+            body += '_Full reports available in the Actions run artifacts._';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

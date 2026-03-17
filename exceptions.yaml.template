@@ -1,0 +1,35 @@
+# MultiCloud Security Audit Tool — Exception Suppressions Template
+# Copy this file to exceptions.yaml and customise for your environment.
+# Pass to scout: python scout.py aws ... --exceptions exceptions.yaml
+#
+# Each entry suppresses findings that match ALL specified fields.
+# Fields:
+#   rule_id   (str)  : Rule identifier, e.g. SM-01, ECR-02
+#   resource  (str)  : Resource ID prefix to match (optional)
+#   service   (str)  : Service name, e.g. secretsmanager, cosmosdb (optional)
+#   provider  (str)  : Cloud provider: aws | azure | gcp (optional)
+#   reason    (str)  : Justification (required — for audit trail)
+#   expires   (date) : ISO-8601 date after which this exception auto-expires (optional)
+
+suppressions:
+  # Example 1: Suppress a specific rule for a specific resource
+  # - rule_id: SM-01
+  #   resource: "prod/database/password"
+  #   reason: "Rotation managed by HashiCorp Vault external secrets operator"
+  #   expires: "2026-12-31"
+
+  # Example 2: Suppress a rule globally (accepted risk / compensating control)
+  # - rule_id: OS-02
+  #   reason: "OpenSearch domain is non-production and contains no sensitive data"
+
+  # Example 3: Suppress all findings for a service
+  # - service: cosmosdb
+  #   provider: azure
+  #   reason: "Cosmos DB accounts managed and audited by the Database Platform team"
+
+  # Example 4: Suppress ECR tag immutability — enforced via pipeline
+  # - rule_id: ECR-02
+  #   reason: "Tag immutability enforced via GitHub Actions workflow policy — reviewed 2026-01-15"
+  #   expires: "2026-07-01"
+
+  # Add your suppressions below:
