@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MultiCloud Security Audit Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,sans-serif;font-size:14px;line-height:1.6}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+
+/* Header */
+.header{background:linear-gradient(135deg,#161b22 0%,#1c2128 100%);border-bottom:1px solid #30363d;padding:20px 0}
+.header-inner{max-width:1400px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo-row{display:flex;align-items:center;gap:14px}
+.logo-icon{font-size:36px;color:#58a6ff}
+.logo-title{font-size:22px;font-weight:700;color:#e6edf3}
+.logo-sub{font-size:12px;color:#8b949e;margin-top:2px}
+.badge-row{display:flex;gap:8px}
+.hbadge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.hbadge-aws{background:#1a2332;color:#ff9900;border:1px solid #ff9900}
+.hbadge-azure{background:#1a2030;color:#0078d4;border:1px solid #0078d4}
+.hbadge-gcp{background:#1a221a;color:#34a853;border:1px solid #34a853}
+
+/* Container */
+.container{max-width:1400px;margin:0 auto;padding:24px}
+.section{margin-bottom:36px}
+.section-title{font-size:16px;font-weight:600;color:#e6edf3;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px}
+.count-badge{background:#21262d;color:#8b949e;border-radius:10px;padding:2px 8px;font-size:12px;font-weight:500}
+
+/* Summary tiles */
+.tiles{display:flex;flex-wrap:wrap;gap:14px}
+.tile{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:18px 22px;min-width:130px;cursor:pointer;transition:background .15s}
+.tile:hover{background:#1c2128}
+.tile-count{font-size:32px;font-weight:700;line-height:1}
+.tile-label{font-size:11px;color:#8b949e;margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+
+/* Provider cards */
+.pcards{display:flex;flex-wrap:wrap;gap:14px}
+.pcard{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px 20px;min-width:180px;cursor:pointer;transition:background .15s}
+.pcard:hover{background:#1c2128}
+.pcard-title{font-size:15px;font-weight:700;color:#e6edf3;margin-bottom:4px}
+.pcard-total{font-size:12px;color:#8b949e;margin-bottom:10px}
+.pcard-bars{display:flex;flex-direction:column;gap:4px}
+.pbar-item{font-size:12px}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
+.controls input,.controls select,.controls button{background:#161b22;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:7px 11px;font-size:13px;outline:none}
+.controls input{min-width:220px}
+.controls input:focus,.controls select:focus{border-color:#58a6ff}
+.controls button{cursor:pointer;background:#21262d;color:#8b949e}
+.controls button:hover{background:#30363d;color:#e6edf3}
+
+/* Table */
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #21262d}
+table{width:100%;border-collapse:collapse}
+thead{background:#161b22}
+th{padding:10px 12px;text-align:left;font-size:12px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #21262d;white-space:nowrap}
+.finding-row{background:#0d1117;transition:background .1s}
+.finding-row:hover{background:#161b22}
+td{padding:10px 12px;border-bottom:1px solid #21262d;vertical-align:middle}
+.detail-row td{padding:0;background:#0a0d12}
+.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12px}
+.no-results{padding:32px;text-align:center;color:#8b949e;font-size:14px}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.4px}
+.badge-critical{background:#3d0000;color:#ff4444;border:1px solid #ff4444}
+.badge-high{background:#2d1a00;color:#ff8800;border:1px solid #ff8800}
+.badge-medium{background:#2d2700;color:#ffcc00;border:1px solid #ffcc00}
+.badge-low{background:#001a2d;color:#66b3ff;border:1px solid #66b3ff}
+.badge-info{background:#1c1c1c;color:#aaaaaa;border:1px solid #555}
+
+/* Provider tag */
+.prov-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;background:#21262d;color:#8b949e;letter-spacing:.3px}
+
+/* Expand button */
+.expand-btn{background:none;border:none;color:#8b949e;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.expand-btn:hover{background:#21262d;color:#e6edf3}
+
+/* Detail box */
+.detail-box{padding:16px 20px;background:#0a0d12;border-top:1px solid #21262d}
+.detail-grid{display:grid;grid-template-columns:1fr 280px;gap:20px}
+@media(max-width:768px){.detail-grid{grid-template-columns:1fr}}
+.detail-col{}
+.detail-label{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;font-weight:600}
+.detail-value{color:#e6edf3;font-size:13px;line-height:1.6;margin-bottom:4px}
+.remediation{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:10px 12px}
+.comp-pill{display:inline-block;background:#1c2128;border:1px solid #30363d;border-radius:4px;padding:2px 8px;font-size:11px;color:#8b949e;margin:2px 2px 2px 0}
+.res-list{margin:4px 0 0 16px;font-size:12px;color:#8b949e;line-height:1.8}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:#484f58;font-size:12px;border-top:1px solid #21262d;margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <span class="logo-icon">&#9749;</span>
+      <div>
+        <div class="logo-title">MultiCloud Security Audit Tool</div>
+        <div class="logo-sub">v1.0.0 &nbsp;&bull;&nbsp; 2026-03-31 02:20 UTC &nbsp;&bull;&nbsp; demo-account-123456789</div>
+      </div>
+    </div>
+    <div class="badge-row">
+      <span class="hbadge hbadge-aws">AWS</span>
+      <span class="hbadge hbadge-azure">Azure</span>
+      <span class="hbadge hbadge-gcp">GCP</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUMMARY TILES ===== -->
+<div class="container">
+  <section class="section">
+    <h2 class="section-title">Executive Summary</h2>
+    <div class="tiles">
+      <div class="tile" style="border-top:3px solid #ff4444" onclick="filterBySeverity('CRITICAL')">  <div class="tile-count" style="color:#ff4444">2</div>  <div class="tile-label">CRITICAL</div></div>
+<div class="tile" style="border-top:3px solid #ff8800" onclick="filterBySeverity('HIGH')">  <div class="tile-count" style="color:#ff8800">6</div>  <div class="tile-label">HIGH</div></div>
+<div class="tile" style="border-top:3px solid #ffcc00" onclick="filterBySeverity('MEDIUM')">  <div class="tile-count" style="color:#ffcc00">4</div>  <div class="tile-label">MEDIUM</div></div>
+<div class="tile" style="border-top:3px solid #66b3ff" onclick="filterBySeverity('LOW')">  <div class="tile-count" style="color:#66b3ff">1</div>  <div class="tile-label">LOW</div></div>
+<div class="tile" style="border-top:3px solid #aaaaaa" onclick="filterBySeverity('INFO')">  <div class="tile-count" style="color:#aaaaaa">0</div>  <div class="tile-label">INFO</div></div>
+<div class="tile" style="border-top:3px solid #888">  <div class="tile-count" style="color:#e6edf3">13</div>  <div class="tile-label">TOTAL FINDINGS</div></div>
+<div class="tile" style="border-top:3px solid #58a6ff">  <div class="tile-count" style="color:#58a6ff">13</div>  <div class="tile-label">AFFECTED RESOURCES</div></div>
+    </div>
+  </section>
+
+<!-- ===== PROVIDER CARDS ===== -->
+<section class="section"><h2 class="section-title">Providers</h2><div class="pcards"><div class="pcard" onclick="filterByProvider('aws')">  <div class="pcard-title">&#9729; AWS</div>  <div class="pcard-total">13 findings</div>  <div class="pcard-bars"><span class="pbar-item" style="color:#ff4444">  <b>2</b> CRITICAL</span><span class="pbar-item" style="color:#ff8800">  <b>6</b> HIGH</span><span class="pbar-item" style="color:#ffcc00">  <b>4</b> MEDIUM</span><span class="pbar-item" style="color:#66b3ff">  <b>1</b> LOW</span></div></div></div></section>
+
+<!-- ===== FINDINGS TABLE ===== -->
+  <section class="section">
+    <h2 class="section-title">Findings
+      <span class="count-badge">13</span>
+    </h2>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input id="search" type="text" placeholder="&#128269;  Search findings..." oninput="applyFilters()"/>
+      <select id="filterSeverity" onchange="applyFilters()">
+        <option value="">All Severities</option>
+        <option value="CRITICAL">CRITICAL</option>
+        <option value="HIGH">HIGH</option>
+        <option value="MEDIUM">MEDIUM</option>
+        <option value="LOW">LOW</option>
+        <option value="INFO">INFO</option>
+      </select>
+      <select id="filterProvider" onchange="applyFilters()">
+        <option value="">All Providers</option>
+        <option value="aws">AWS</option>
+      </select>
+      <select id="filterService" onchange="applyFilters()">
+        <option value="">All Services</option>
+        <option value="cloudtrail">cloudtrail</option><option value="ec2">ec2</option><option value="guardduty">guardduty</option><option value="iam">iam</option><option value="kms">kms</option><option value="rds">rds</option><option value="s3">s3</option><option value="vpc">vpc</option>
+      </select>
+      <button onclick="clearFilters()">Clear</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="findingsTable">
+        <thead>
+          <tr>
+            <th style="width:100px">Severity</th>
+            <th style="width:110px">Rule ID</th>
+            <th style="width:90px">Provider</th>
+            <th style="width:110px">Service</th>
+            <th>Finding</th>
+            <th style="width:80px;text-align:center">Affected</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          
+<tr class="finding-row"
+    data-severity="CRITICAL"
+    data-provider="aws"
+    data-service="iam"
+    data-text="iam-01 root account mfa not enabled the aws root account does not have multi-factor authentication (mfa) enabled. the root account has unrestricted access to all aws resources."
+    style="border-left: 3px solid #ff4444">
+  <td><span class="badge badge-critical">CRITICAL</span></td>
+  <td class="mono">IAM-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>iam</td>
+  <td><strong>Root account MFA not enabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff4444">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-0', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-0" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">The AWS root account does not have multi-factor authentication (MFA) enabled. The root account has unrestricted access to all AWS resources.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable MFA for the root account in the AWS IAM console under &#x27;Security credentials&#x27;. Use a hardware MFA device for root accounts.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;1.5</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">iam.account_summary</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>root</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="CRITICAL"
+    data-provider="aws"
+    data-service="rds"
+    data-text="rds-01 rds instance publicly accessible the rds database instance is configured with publiclyaccessible=true, exposing the database endpoint to the internet."
+    style="border-left: 3px solid #ff4444">
+  <td><span class="badge badge-critical">CRITICAL</span></td>
+  <td class="mono">RDS-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>rds</td>
+  <td><strong>RDS instance publicly accessible</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff4444">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-1', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-1" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">The RDS database instance is configured with PubliclyAccessible=true, exposing the database endpoint to the internet.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Set PubliclyAccessible=false. Place RDS instances in private subnets with no direct internet route. Use a bastion host or AWS PrivateLink for access.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;2.3.3</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">rds.instances.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>prod-postgres</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="iam"
+    data-text="iam-05 console user without mfa iam users with console access do not have mfa enabled, leaving accounts vulnerable to credential theft attacks."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">IAM-05</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>iam</td>
+  <td><strong>Console user without MFA</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-2', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-2" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">IAM users with console access do not have MFA enabled, leaving accounts vulnerable to credential theft attacks.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable MFA for all IAM users with console access. Enforce MFA via an IAM policy with a condition on &#x27;aws:MultiFactorAuthPresent&#x27;.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;1.10</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">iam.users.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>alice</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="s3"
+    data-text="s3-01 s3 block public access not fully enabled one or more s3 buckets have block public access settings disabled, potentially exposing data to the internet."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">S3-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>s3</td>
+  <td><strong>S3 Block Public Access not fully enabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-3', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-3" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">One or more S3 buckets have Block Public Access settings disabled, potentially exposing data to the internet.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable all four S3 Block Public Access settings at both the account and bucket level. Use bucket policies with explicit Deny for public access.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;2.1.4</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">s3.buckets.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>company-public-data</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="ec2"
+    data-text="ec2-04 ec2 instance with imdsv1 enabled instance metadata service v1 (imdsv1) does not require authentication, making instances vulnerable to ssrf-based metadata theft (e.g., credential exfiltration)."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">EC2-04</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>ec2</td>
+  <td><strong>EC2 instance with IMDSv1 enabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-4', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-4" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">Instance Metadata Service v1 (IMDSv1) does not require authentication, making instances vulnerable to SSRF-based metadata theft (e.g., credential exfiltration).</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Set HttpTokens=required in instance metadata options to enforce IMDSv2. Apply via AWS CLI: aws ec2 modify-instance-metadata-options --http-tokens required.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;5.6</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">ec2.instances.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>i-0abc123456</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="rds"
+    data-text="rds-02 rds storage not encrypted rds storage encryption is disabled. database data at rest is stored unencrypted, risking exposure in the event of physical media compromise."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">RDS-02</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>rds</td>
+  <td><strong>RDS storage not encrypted</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-5', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-5" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">RDS storage encryption is disabled. Database data at rest is stored unencrypted, risking exposure in the event of physical media compromise.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable storage encryption on the RDS instance. Note: encryption can only be enabled at creation time; migrate existing unencrypted instances via snapshot restore.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;2.3.1</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">rds.instances.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>prod-postgres</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="cloudtrail"
+    data-text="ct-01 cloudtrail log file validation disabled cloudtrail log file validation is not enabled. without it, attackers can tamper with audit logs without detection."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">CT-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>cloudtrail</td>
+  <td><strong>CloudTrail log file validation disabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-6', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-6" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">CloudTrail log file validation is not enabled. Without it, attackers can tamper with audit logs without detection.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable log file validation on all trails via: aws cloudtrail update-trail --name &lt;trail&gt; --enable-log-file-validation.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;3.2</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">cloudtrail.trails.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>main-trail</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="HIGH"
+    data-provider="aws"
+    data-service="guardduty"
+    data-text="gd-01 guardduty detector disabled amazon guardduty is not enabled. without guardduty, threat detection for unauthorized behaviour, compromised instances, and account reconnaissance is absent."
+    style="border-left: 3px solid #ff8800">
+  <td><span class="badge badge-high">HIGH</span></td>
+  <td class="mono">GD-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>guardduty</td>
+  <td><strong>GuardDuty detector disabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ff8800">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-7', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-7" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">Amazon GuardDuty is not enabled. Without GuardDuty, threat detection for unauthorized behaviour, compromised instances, and account reconnaissance is absent.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable GuardDuty in all regions. Enable optional protection plans (S3, EKS, RDS, Lambda, Malware). Configure SNS alerts for HIGH/CRITICAL findings.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;4.9</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">guardduty.detectors.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>detector-0001</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="MEDIUM"
+    data-provider="aws"
+    data-service="iam"
+    data-text="iam-06 iam password policy too weak the account&#x27;s iam password policy does not meet minimum security requirements (length &lt; 14, missing complexity, no expiry)."
+    style="border-left: 3px solid #ffcc00">
+  <td><span class="badge badge-medium">MEDIUM</span></td>
+  <td class="mono">IAM-06</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>iam</td>
+  <td><strong>IAM password policy too weak</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ffcc00">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-8', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-8" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">The account&#x27;s IAM password policy does not meet minimum security requirements (length &lt; 14, missing complexity, no expiry).</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Set MinimumPasswordLength &gt;= 14, enable all complexity requirements, set MaxPasswordAge to 90 days or fewer.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;1.8</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">iam.password_policy</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>account</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="MEDIUM"
+    data-provider="aws"
+    data-service="kms"
+    data-text="kms-01 kms key rotation not enabled customer-managed kms keys do not have automatic annual key rotation enabled, increasing the risk of cryptographic key compromise."
+    style="border-left: 3px solid #ffcc00">
+  <td><span class="badge badge-medium">MEDIUM</span></td>
+  <td class="mono">KMS-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>kms</td>
+  <td><strong>KMS key rotation not enabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ffcc00">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-9', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-9" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">Customer-managed KMS keys do not have automatic annual key rotation enabled, increasing the risk of cryptographic key compromise.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable automatic key rotation: aws kms enable-key-rotation --key-id &lt;key-id&gt;. Keys are rotated annually.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;3.7</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">kms.keys.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>key-0001</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="MEDIUM"
+    data-provider="aws"
+    data-service="vpc"
+    data-text="vpc-01 vpc flow logs not enabled no vpc flow logs are configured. without flow logs, network traffic to and from ec2 instances cannot be audited or used for incident investigation."
+    style="border-left: 3px solid #ffcc00">
+  <td><span class="badge badge-medium">MEDIUM</span></td>
+  <td class="mono">VPC-01</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>vpc</td>
+  <td><strong>VPC Flow Logs not enabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ffcc00">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-10', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-10" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">No VPC Flow Logs are configured. Without flow logs, network traffic to and from EC2 instances cannot be audited or used for incident investigation.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Enable VPC Flow Logs for all VPCs. Send logs to CloudWatch Logs or S3. Set retention to at least 90 days.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;3.9</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">vpc.flow_logs</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>vpc</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="MEDIUM"
+    data-provider="aws"
+    data-service="rds"
+    data-text="rds-03 rds automated backups disabled rds automated backup retention is set to 0 days, disabling backups entirely. this prevents point-in-time recovery in the event of data loss or corruption."
+    style="border-left: 3px solid #ffcc00">
+  <td><span class="badge badge-medium">MEDIUM</span></td>
+  <td class="mono">RDS-03</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>rds</td>
+  <td><strong>RDS automated backups disabled</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#ffcc00">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-11', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-11" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">RDS automated backup retention is set to 0 days, disabling backups entirely. This prevents point-in-time recovery in the event of data loss or corruption.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Set BackupRetentionPeriod to at least 7 days (35 days for compliance-sensitive workloads).</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;2.3.2</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">rds.instances.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>prod-postgres</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<tr class="finding-row"
+    data-severity="LOW"
+    data-provider="aws"
+    data-service="iam"
+    data-text="iam-10 stale iam access key (&gt;90 days) an active iam access key has not been rotated in over 90 days, increasing the risk of long-term credential compromise."
+    style="border-left: 3px solid #66b3ff">
+  <td><span class="badge badge-low">LOW</span></td>
+  <td class="mono">IAM-10</td>
+  <td><span class="prov-tag">AWS</span></td>
+  <td>iam</td>
+  <td><strong>Stale IAM access key (&gt;90 days)</strong></td>
+  <td style="text-align:center;font-weight:bold;color:#66b3ff">1</td>
+  <td><button class="expand-btn" onclick="toggleDetail('detail-12', this)">&#9660;</button></td>
+</tr>
+<tr id="detail-12" class="detail-row" style="display:none">
+  <td colspan="7">
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-col">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">An active IAM access key has not been rotated in over 90 days, increasing the risk of long-term credential compromise.</div>
+          <div class="detail-label" style="margin-top:12px">Remediation</div>
+          <div class="detail-value remediation">Rotate access keys every 90 days. Disable or delete keys unused for 30+ days. Use IAM roles instead of long-term access keys where possible.</div>
+          <div class="detail-label" style="margin-top:12px">Compliance</div><div class="detail-value"><span class="comp-pill">CIS AWS Foundations 3.0 &sect;1.14</span> </div>
+          <div class="detail-label" style="margin-top:12px">References</div><div class="detail-value"><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html" target="_blank" rel="noopener noreferrer">https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html</a><br/></div>
+          <div class="detail-label" style="margin-top:12px">Resource Path</div>
+          <div class="detail-value mono">iam.users.*</div>
+        </div>
+        <div class="detail-col">
+          <div class="detail-label">Affected Resources (1)</div>
+          <ul class="res-list"><li>alice</li></ul>
+        </div>
+      </div>
+    </div>
+  </td>
+</tr>
+        </tbody>
+      </table>
+      <div id="noResults" class="no-results" style="display:none">No findings match the current filters.</div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  MultiCloud Security Audit Tool &mdash; For authorised security assessments only. Read-only API calls. No resources modified.
+</div>
+
+<script>
+// Raw findings data (for future client-side use)
+const FINDINGS_DATA = JSON.parse(document.getElementById('findings-data').textContent);
+
+function applyFilters() {
+  const search   = document.getElementById('search').value.toLowerCase();
+  const severity = document.getElementById('filterSeverity').value;
+  const provider = document.getElementById('filterProvider').value;
+  const service  = document.getElementById('filterService').value;
+  const rows     = document.querySelectorAll('.finding-row');
+  let visible = 0;
+
+  rows.forEach(row => {
+    const matchSev  = !severity || row.dataset.severity === severity;
+    const matchProv = !provider || row.dataset.provider === provider;
+    const matchSvc  = !service  || row.dataset.service  === service;
+    const matchSrch = !search   || row.dataset.text.includes(search);
+    const show = matchSev && matchProv && matchSvc && matchSrch;
+    row.style.display = show ? '' : 'none';
+    // Hide detail row when parent is hidden
+    const detailBtn = row.querySelector('.expand-btn');
+    if (detailBtn) {
+      const detailId = detailBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+      const detailRow = document.getElementById(detailId);
+      if (detailRow) detailRow.style.display = 'none';
+    }
+    if (show) visible++;
+  });
+
+  document.getElementById('noResults').style.display = visible === 0 ? '' : 'none';
+}
+
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('filterSeverity').value = '';
+  document.getElementById('filterProvider').value = '';
+  document.getElementById('filterService').value  = '';
+  applyFilters();
+}
+
+function filterBySeverity(sev) {
+  document.getElementById('filterSeverity').value = sev;
+  applyFilters();
+  document.getElementById('findingsTable').scrollIntoView({behavior:'smooth'});
+}
+
+function filterByProvider(prov) {
+  document.getElementById('filterProvider').value = prov;
+  applyFilters();
+  document.getElementById('findingsTable').scrollIntoView({behavior:'smooth'});
+}
+
+function toggleDetail(id, btn) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : '';
+  btn.innerHTML = open ? '&#9660;' : '&#9650;';
+}
+</script>
+<script id="findings-data" type="application/json">[{&quot;rule_id&quot;: &quot;IAM-01&quot;, &quot;name&quot;: &quot;Root account MFA not enabled&quot;, &quot;description&quot;: &quot;The AWS root account does not have multi-factor authentication (MFA) enabled. The root account has unrestricted access to all AWS resources.&quot;, &quot;severity&quot;: &quot;CRITICAL&quot;, &quot;service&quot;: &quot;iam&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;iam.account_summary&quot;, &quot;remediation&quot;: &quot;Enable MFA for the root account in the AWS IAM console under &#x27;Security credentials&#x27;. Use a hardware MFA device for root accounts.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;1.5&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;root&quot;, &quot;details&quot;: {&quot;AccountMFAEnabled&quot;: 0}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;RDS-01&quot;, &quot;name&quot;: &quot;RDS instance publicly accessible&quot;, &quot;description&quot;: &quot;The RDS database instance is configured with PubliclyAccessible=true, exposing the database endpoint to the internet.&quot;, &quot;severity&quot;: &quot;CRITICAL&quot;, &quot;service&quot;: &quot;rds&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;rds.instances.*&quot;, &quot;remediation&quot;: &quot;Set PubliclyAccessible=false. Place RDS instances in private subnets with no direct internet route. Use a bastion host or AWS PrivateLink for access.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;2.3.3&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;prod-postgres&quot;, &quot;details&quot;: {&quot;PubliclyAccessible&quot;: true, &quot;StorageEncrypted&quot;: false}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;IAM-05&quot;, &quot;name&quot;: &quot;Console user without MFA&quot;, &quot;description&quot;: &quot;IAM users with console access do not have MFA enabled, leaving accounts vulnerable to credential theft attacks.&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;iam&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;iam.users.*&quot;, &quot;remediation&quot;: &quot;Enable MFA for all IAM users with console access. Enforce MFA via an IAM policy with a condition on &#x27;aws:MultiFactorAuthPresent&#x27;.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;1.10&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;alice&quot;, &quot;details&quot;: {&quot;name&quot;: &quot;alice&quot;, &quot;MFADevices&quot;: []}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;S3-01&quot;, &quot;name&quot;: &quot;S3 Block Public Access not fully enabled&quot;, &quot;description&quot;: &quot;One or more S3 buckets have Block Public Access settings disabled, potentially exposing data to the internet.&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;s3&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;s3.buckets.*&quot;, &quot;remediation&quot;: &quot;Enable all four S3 Block Public Access settings at both the account and bucket level. Use bucket policies with explicit Deny for public access.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;2.1.4&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;company-public-data&quot;, &quot;details&quot;: {&quot;BlockPublicAcls&quot;: false}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;EC2-04&quot;, &quot;name&quot;: &quot;EC2 instance with IMDSv1 enabled&quot;, &quot;description&quot;: &quot;Instance Metadata Service v1 (IMDSv1) does not require authentication, making instances vulnerable to SSRF-based metadata theft (e.g., credential exfiltration).&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;ec2&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;ec2.instances.*&quot;, &quot;remediation&quot;: &quot;Set HttpTokens=required in instance metadata options to enforce IMDSv2. Apply via AWS CLI: aws ec2 modify-instance-metadata-options --http-tokens required.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;5.6&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;i-0abc123456&quot;, &quot;details&quot;: {&quot;MetadataOptions&quot;: {&quot;HttpTokens&quot;: &quot;optional&quot;}}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;RDS-02&quot;, &quot;name&quot;: &quot;RDS storage not encrypted&quot;, &quot;description&quot;: &quot;RDS storage encryption is disabled. Database data at rest is stored unencrypted, risking exposure in the event of physical media compromise.&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;rds&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;rds.instances.*&quot;, &quot;remediation&quot;: &quot;Enable storage encryption on the RDS instance. Note: encryption can only be enabled at creation time; migrate existing unencrypted instances via snapshot restore.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;2.3.1&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;prod-postgres&quot;, &quot;details&quot;: {&quot;StorageEncrypted&quot;: false}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;CT-01&quot;, &quot;name&quot;: &quot;CloudTrail log file validation disabled&quot;, &quot;description&quot;: &quot;CloudTrail log file validation is not enabled. Without it, attackers can tamper with audit logs without detection.&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;cloudtrail&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;cloudtrail.trails.*&quot;, &quot;remediation&quot;: &quot;Enable log file validation on all trails via: aws cloudtrail update-trail --name &lt;trail&gt; --enable-log-file-validation.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;3.2&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;main-trail&quot;, &quot;details&quot;: {&quot;LogFileValidationEnabled&quot;: false}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;GD-01&quot;, &quot;name&quot;: &quot;GuardDuty detector disabled&quot;, &quot;description&quot;: &quot;Amazon GuardDuty is not enabled. Without GuardDuty, threat detection for unauthorized behaviour, compromised instances, and account reconnaissance is absent.&quot;, &quot;severity&quot;: &quot;HIGH&quot;, &quot;service&quot;: &quot;guardduty&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;guardduty.detectors.*&quot;, &quot;remediation&quot;: &quot;Enable GuardDuty in all regions. Enable optional protection plans (S3, EKS, RDS, Lambda, Malware). Configure SNS alerts for HIGH/CRITICAL findings.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;4.9&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;detector-0001&quot;, &quot;details&quot;: {&quot;Status&quot;: &quot;DISABLED&quot;}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;IAM-06&quot;, &quot;name&quot;: &quot;IAM password policy too weak&quot;, &quot;description&quot;: &quot;The account&#x27;s IAM password policy does not meet minimum security requirements (length &lt; 14, missing complexity, no expiry).&quot;, &quot;severity&quot;: &quot;MEDIUM&quot;, &quot;service&quot;: &quot;iam&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;iam.password_policy&quot;, &quot;remediation&quot;: &quot;Set MinimumPasswordLength &gt;= 14, enable all complexity requirements, set MaxPasswordAge to 90 days or fewer.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;1.8&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;account&quot;, &quot;details&quot;: {&quot;MinimumPasswordLength&quot;: 6}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;KMS-01&quot;, &quot;name&quot;: &quot;KMS key rotation not enabled&quot;, &quot;description&quot;: &quot;Customer-managed KMS keys do not have automatic annual key rotation enabled, increasing the risk of cryptographic key compromise.&quot;, &quot;severity&quot;: &quot;MEDIUM&quot;, &quot;service&quot;: &quot;kms&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;kms.keys.*&quot;, &quot;remediation&quot;: &quot;Enable automatic key rotation: aws kms enable-key-rotation --key-id &lt;key-id&gt;. Keys are rotated annually.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;3.7&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;key-0001&quot;, &quot;details&quot;: {&quot;KeyRotationEnabled&quot;: false}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;VPC-01&quot;, &quot;name&quot;: &quot;VPC Flow Logs not enabled&quot;, &quot;description&quot;: &quot;No VPC Flow Logs are configured. Without flow logs, network traffic to and from EC2 instances cannot be audited or used for incident investigation.&quot;, &quot;severity&quot;: &quot;MEDIUM&quot;, &quot;service&quot;: &quot;vpc&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;vpc.flow_logs&quot;, &quot;remediation&quot;: &quot;Enable VPC Flow Logs for all VPCs. Send logs to CloudWatch Logs or S3. Set retention to at least 90 days.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;3.9&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;vpc&quot;, &quot;details&quot;: {}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;RDS-03&quot;, &quot;name&quot;: &quot;RDS automated backups disabled&quot;, &quot;description&quot;: &quot;RDS automated backup retention is set to 0 days, disabling backups entirely. This prevents point-in-time recovery in the event of data loss or corruption.&quot;, &quot;severity&quot;: &quot;MEDIUM&quot;, &quot;service&quot;: &quot;rds&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;rds.instances.*&quot;, &quot;remediation&quot;: &quot;Set BackupRetentionPeriod to at least 7 days (35 days for compliance-sensitive workloads).&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;2.3.2&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;prod-postgres&quot;, &quot;details&quot;: {&quot;BackupRetentionPeriod&quot;: 0}}], &quot;flagged_count&quot;: 1}, {&quot;rule_id&quot;: &quot;IAM-10&quot;, &quot;name&quot;: &quot;Stale IAM access key (&gt;90 days)&quot;, &quot;description&quot;: &quot;An active IAM access key has not been rotated in over 90 days, increasing the risk of long-term credential compromise.&quot;, &quot;severity&quot;: &quot;LOW&quot;, &quot;service&quot;: &quot;iam&quot;, &quot;provider&quot;: &quot;aws&quot;, &quot;resource_path&quot;: &quot;iam.users.*&quot;, &quot;remediation&quot;: &quot;Rotate access keys every 90 days. Disable or delete keys unused for 30+ days. Use IAM roles instead of long-term access keys where possible.&quot;, &quot;compliance&quot;: [{&quot;name&quot;: &quot;CIS AWS Foundations&quot;, &quot;version&quot;: &quot;3.0&quot;, &quot;reference&quot;: &quot;1.14&quot;}], &quot;references&quot;: [&quot;https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html&quot;], &quot;flagged_items&quot;: [{&quot;id&quot;: &quot;alice&quot;, &quot;details&quot;: {&quot;AccessKeyId&quot;: &quot;AKIA1111&quot;, &quot;CreateDate&quot;: &quot;2022-03-01&quot;}}], &quot;flagged_count&quot;: 1}]</script>
+</body>
+</html>
